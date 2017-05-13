@@ -112,33 +112,34 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
     return output
 
 sympy.init_printing()
-#print("""Please Select A Method:
-#1) Newton-Raphson Method
-#2) Secant Method
-#3) Bisection Method
-#4) Regula-Falsi Method
-#5) Modified Newton(With Known Multiplicity)
-#6) Modified Newton(With Unknown Multiplicity)""")
-eqn = input("Please Enter The Equation: ")#Test Code (Just Enter x^2 - 4)
-#var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
-#symbol = sympy.symbols(var)
-expr = sympy.sympify(eqn)
-free_symbols = expr.free_symbols
-if len(free_symbols) != 1:
-    raise ValueError("The Expression Contains More Than One Variable")
 
-symbol = free_symbols.pop()
-expr_diff = sympy.diff(expr, symbol)
-expr_diff2 = sympy.diff(expr_diff, symbol)
-f = sympy.utilities.lambdify(symbol, expr)
-g = sympy.utilities.lambdify(symbol, expr_diff)
-h = sympy.utilities.lambdify(symbol, expr_diff2)
-#f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
-#g = lambda x: 3 * x ** 2 - 4 * x - 4
-#h = lambda x: 6 * x - 4
-#print("Regula Falsi:", regula_falsi(f, 1.5, 2.2, 1e-5, 100))
-#print("Bisection:", bisection(f, 1.5, 2.2, 1e-5, 100))
-print("Newton:", newton(f, g, 2.2))
-print("Secant:", secant(f, 1.5, 2.2))
-print("Modified Newton #1:", newton_mod1(f, g, 2.2, 2))
-print("Modified Newton #2:", newton_mod2(f, g, h, 2.2))
+if __name__ == '__main__':
+    # print("""Please Select A Method:
+    # 1) Newton-Raphson Method
+    # 2) Secant Method
+    # 3) Bisection Method
+    # 4) Regula-Falsi Method
+    # 5) Modified Newton(With Known Multiplicity)
+    # 6) Modified Newton(With Unknown Multiplicity)""")
+    eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
+    # var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
+    # symbol = sympy.symbols(var)
+    expr = sympy.sympify(eqn)
+    free_symbols = expr.free_symbols
+    if len(free_symbols) != 1:
+        raise ValueError("The Expression Contains More Than One Variable")
+    symbol = free_symbols.pop()
+    expr_diff = sympy.diff(expr, symbol)
+    expr_diff2 = sympy.diff(expr_diff, symbol)
+    f = sympy.utilities.lambdify(symbol, expr)
+    g = sympy.utilities.lambdify(symbol, expr_diff)
+    h = sympy.utilities.lambdify(symbol, expr_diff2)
+    # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
+    # g = lambda x: 3 * x ** 2 - 4 * x - 4
+    # h = lambda x: 6 * x - 4
+    # print("Regula Falsi:", regula_falsi(f, 1.5, 2.2, 1e-5, 100))
+    # print("Bisection:", bisection(f, 1.5, 2.2, 1e-5, 100))
+    print("Newton:", newton(f, g, 2.2))
+    print("Secant:", secant(f, 1.5, 2.2))
+    print("Modified Newton #1:", newton_mod1(f, g, 2.2, 2))
+    print("Modified Newton #2:", newton_mod2(f, g, h, 2.2))
