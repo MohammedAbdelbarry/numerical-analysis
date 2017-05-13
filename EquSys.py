@@ -2,6 +2,14 @@ import sympy
 
 
 def _forward_eliminate(system: sympy.Matrix, i, j):
+    """
+    Performs forward eliminates on a row inside a system of linear equations.
+    :param system: linear equations system.
+    :param i: index of the base row.
+    :param j: index of the row to be eliminated.
+    :var system: a mutable matrix can be passed (reference passing)
+    :return: an augmented square matrix after eliminating the row.
+    """
     n = system.shape[1]
     c = system[j, i] / system[i, i]
     for k in range(0, n):
@@ -9,7 +17,31 @@ def _forward_eliminate(system: sympy.Matrix, i, j):
     return system
 
 
-def gauss(system: sympy.Matrix, max_err=1e-5, max_iter=50):
+def _back_sub(tri_mat: sympy.Matrix):
+    """
+    Performs back substitution on an augmented upper triangular matrix.
+    :param tri_mat: augmented triangular matrix.
+    :return: a [n, 1] matrix containing result.
+    """
+    # TODO: Check if scaling is necessary
+    n = tri_mat.shape[0]
+    x = sympy.zeros(n, 1)
+    x[n - 1] = tri_mat[n - 1, n] / tri_mat[n - 1, n - 1]
+    for i in range(n - 2, -1, -1):
+        s = 0
+        for j in range(i + 1, n):
+            s += tri_mat[i, j] * x[j, 0]
+        x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
+    return x
+
+
+def gauss(system: sympy.Matrix):
+    """
+    Performs gauss elimination with partial pivoting on a system of
+    linear equations.
+    :param system: system of linear equations.
+    :return: a [n, 1] matrix containing result.
+    """
     system = system.as_mutable()
     n = system.shape[0]
     # iterate over columns
@@ -24,10 +56,12 @@ def gauss(system: sympy.Matrix, max_err=1e-5, max_iter=50):
         # forward elimination, iterate over remaining rows and eliminate
         for j in range(i + 1, n):
             _forward_eliminate(system, i, j)
-    # TODO: back substitution
-    return system
+    # perform back substitution.
+    return _back_sub(system)
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
+
+
     n = A.shape[0]
     if b == None:
         A, b = [A[:, :-1], A[:, -1]]
@@ -49,6 +83,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     return sympy.N(x), sympy.N(x_hist), err_hist
 
 def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
+    
     n = A.shape[0]
     if b == None:
         A, b = [A[:, :-1], A[:, -1]]

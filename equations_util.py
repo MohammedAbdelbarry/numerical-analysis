@@ -5,7 +5,8 @@ import sympy
 from EquSys import *
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
-    Transform a list of equations into an augmented matrix.
+    Transform a list of equations into two matrices A(the coefficients matrix)
+    and b(the r.h.s matrix).
 
     Keyword arguments:
     equations: list -- A list of containing the string representation of the equations.
@@ -55,5 +56,3 @@ sympy.pprint(sympy.N(aug))
 x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
 sympy.pprint(x)
 print(len(err_hist))
-print(equations_to_aug_matrix.__doc__)
-print(sym)
