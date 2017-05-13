@@ -8,5 +8,7 @@ methods = {'Newton-Raphson': newton, 'Secant': secant, 'Bisection': bisection,
 
 # testing gauss elimination with partial pivoting.
 m = sympy.Matrix([[25, 5, 1, 106.8], [64, 8, 1, 177.2], [144, 12, 1, 279.2]])
-sympy.pprint(sympy.N(gauss(m), 4))
+sympy.pprint(sympy.N(gauss_jordan(m), 4))
 print(sympy.solve_linear_system(m, x, y, z))
+# print(sympy.Matrix(reversed(m.col(m.shape[0]))))
+# print(m.col(m.shape[0]).tolist()[0][0])
