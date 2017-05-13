@@ -11,10 +11,8 @@ def equations_to_aug_matrix(equations: list):
         parsed_eqn = sympy.Eq(sympy.sympify(lhs), sympy.sympify(rhs))
         symbols |= parsed_eqn.free_symbols
         parsed_equations.append(parsed_eqn)
-    print(parsed_equations, symbols)
-    symbol_list = list(symbols)
+    symbol_list = sorted(list(symbols), key = str)
     A, b = sympy.linear_eq_to_matrix(parsed_equations, symbol_list)
-    print(A.shape, b.shape)
     return A.row_join(b), symbol_list
 
 sympy.init_printing()
