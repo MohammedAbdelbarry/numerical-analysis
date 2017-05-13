@@ -30,7 +30,7 @@ def equations_to_aug_matrix(equations: list):
     assert(not bool(A.free_symbols) and not bool(b.free_symbols))
     return A.row_join(b), symbol_list
 
-sympy.init_printing(use_unicode=True)
+sympy.init_printing()
 aug, sym = equations_to_aug_matrix(["2*x - 3*y + 4 == 0", "x+y+z=-3", "x-z-2*y=-15"])
 print(aug)
 print(equations_to_aug_matrix.__doc__)
