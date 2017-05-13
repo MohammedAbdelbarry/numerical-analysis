@@ -1,5 +1,6 @@
 import sympy
 
+
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=100):
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
@@ -50,12 +51,12 @@ def bisection(f, xl, xu, max_err=1e-5, max_iter=100):
     return output
 
 
-def newton(f, fdiff, xi, max_err=1e-5, max_iter=100):
+def newton(f, f_diff, xi, max_err=1e-5, max_iter=100):
     output = sympy.Matrix([[0, 0]])
     output.row_del(0)
     for _ in range(1, max_iter):
         fxi = f(xi)
-        fxi_diff = fdiff(xi)
+        fxi_diff = f_diff(xi)
         root = xi - fxi / fxi_diff
         err = abs((root - xi))
         xi = root
@@ -65,12 +66,12 @@ def newton(f, fdiff, xi, max_err=1e-5, max_iter=100):
     return output
 
 
-def newton_mod1(f, fdiff, xi, m, max_err=1e-5, max_iter=100):
+def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=100):
     output = sympy.Matrix([[0, 0]])
     output.row_del(0)
     for _ in range(1, max_iter):
         fxi = f(xi)
-        fxi_diff = fdiff(xi)
+        fxi_diff = f_diff(xi)
         root = xi - m * fxi / fxi_diff
         err = abs((root - xi))
         xi = root
@@ -80,14 +81,14 @@ def newton_mod1(f, fdiff, xi, m, max_err=1e-5, max_iter=100):
     return output
 
 
-def newton_mod2(f, fdiff, fdiff2, xi, max_err=1e-5, max_iter=100):
+def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=100):
     output = sympy.Matrix([[0, 0]])
     output.row_del(0)
     for _ in range(1, max_iter):
         fxi = f(xi)
-        fdiffxi = fdiff(xi)
-        fdiffxi2 = fdiff2(xi)
-        root = xi - fdiffxi * fxi / (fdiffxi ** 2 - fxi * fdiffxi2)
+        f_diff_xi = f_diff(xi)
+        f_diff_xi2 = f_diff2(xi)
+        root = xi - f_diff_xi * fxi / (f_diff_xi ** 2 - fxi * f_diff_xi2)
         err = abs((root - xi))
         xi = root
         output = output.col_join(sympy.Matrix([[root, err]]))
@@ -110,6 +111,7 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
         if err <= max_err:
             return output
     return output
+
 
 sympy.init_printing()
 
