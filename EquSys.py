@@ -34,7 +34,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     if x == None:
         x = sympy.Matrix.zeros(n, 1)
     D = A.multiply_elementwise(sympy.Matrix.eye(n))
-    x_prev = x
+    x_prev = x[:, :]
     err_hist = []
     x_hist = sympy.Matrix(x)
     for _ in range(0, max_iter):
@@ -43,7 +43,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
         diff = (x - x_prev).applyfunc(abs)
         err = max(max(diff.tolist()))
         err_hist.append(err.evalf())
-        x_prev = x
+        x_prev = x[:, :]
         if err < max_err:
             return sympy.N(x), sympy.N(x_hist), err_hist
     return sympy.N(x), sympy.N(x_hist), err_hist
@@ -54,21 +54,24 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
         A, b = [A[:, :-1], A[:, -1]]
     if x == None:
         x = sympy.Matrix.zeros(n, 1)
-    x_prev = x
+    print(A)
+    print(b)
+    x_prev = x[:, :]
     err_hist = []
     x_hist = sympy.Matrix(x)
     for _ in range(0, max_iter):
         for i in range(0, n):
-            xi_new = b[i, 0]
+            xi_new = b[i]
             for j in range(0, n):
                 if i != j:
-                    xi_new -= A[i, j] * x[j, 0]
-            x[i, 0] = xi_new / A[i, i]
+                    xi_new -= A[i, j] * x[j]
+                x[i] = xi_new / A[i, i]
         x_hist = x_hist.row_join(x)
         diff = (x - x_prev).applyfunc(abs)
         err = max(max(diff.tolist()))
+    #    print(x_prev)
         err_hist.append(err.evalf())
-        x_prev = x
+        x_prev = x[:, :]
         if err < max_err:
             return sympy.N(x), sympy.N(x_hist), err_hist
     return sympy.N(x), sympy.N(x_hist), err_hist
