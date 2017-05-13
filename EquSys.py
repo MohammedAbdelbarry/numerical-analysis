@@ -47,10 +47,7 @@ def gauss(system: sympy.Matrix):
     # iterate over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = abs(system[i, i]), i
-        for j in range(i + 1, n):
-            if abs(system[j, i]) > max_mag:
-                max_mag, max_ind = abs(system[j, i]), j
+        max_mag, max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # forward elimination, iterate over remaining rows and eliminate
