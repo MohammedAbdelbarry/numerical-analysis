@@ -60,7 +60,23 @@ def gauss(system: sympy.Matrix):
     return _back_sub(system)
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
+    """Jacobi Iterative Method for Solving A System of Linear Equations:
+    takes a system of linear equations and returns an approximate solution
+    for the system using Jacobi's approximation.
 
+    Keyword arguments:
+    A: sympy.Matrix -- The augmented matrix representing the system if b = None
+    else the coefficients matrix.
+    b: sympy.Matrix -- The r.h.s matrix of the system.
+    max_iter: int -- The maximum number of iterations to perform.
+    max_err: float -- The maximum allowed error.
+    x: sympy.Matrix -- The initial value for the variables.
+
+    return:
+    1) The vector x containing the final approximate solution.
+    2) The matrix x_hist containing the values of x during each iteration.
+    3) The list err_hist containing the values of the error during each iteration.
+    """
 
     n = A.shape[0]
     if b == None:
@@ -83,7 +99,23 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     return sympy.N(x), sympy.N(x_hist), err_hist
 
 def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
-    
+    """Gauss-Seidel Iterative Method for Solving A System of Linear Equations:
+    takes a system of linear equations and returns an approximate solution
+    for the system using Gauss-Seidel approximation.
+
+    Keyword arguments:
+    A: sympy.Matrix -- The augmented matrix representing the system if b = None
+    else the coefficients matrix.
+    b: sympy.Matrix -- The r.h.s matrix of the system.
+    max_iter: int -- The maximum number of iterations to perform.
+    max_err: float -- The maximum allowed error.
+    x: sympy.Matrix -- The initial value for the variables.
+
+    return:
+    1) The vector x containing the final approximate solution.
+    2) The matrix x_hist containing the values of x during each iteration.
+    3) The list err_hist containing the values of the error during each iteration.
+    """
     n = A.shape[0]
     if b == None:
         A, b = [A[:, :-1], A[:, -1]]
