@@ -47,10 +47,7 @@ def gauss(system: sympy.Matrix):
     # iterate over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = abs(system[i, i]), i
-        for j in range(i + 1, n):
-            if abs(system[j, i]) > max_mag:
-                max_mag, max_ind = abs(system[j, i]), j
+        max_mag, max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # forward elimination, iterate over remaining rows and eliminate
@@ -58,6 +55,42 @@ def gauss(system: sympy.Matrix):
             _forward_eliminate(system, i, j)
     # perform back substitution.
     return _back_sub(system)
+
+
+def _get_max_elem(system, i):
+    n = system.shape[0]
+    max_mag, max_ind = abs(system[i, i]), i
+    for j in range(i + 1, n):
+        if abs(system[j, i]) > max_mag:
+            max_mag, max_ind = abs(system[j, i]), j
+    return max_mag, max_ind
+
+
+def gauss_jordan(system: sympy.Matrix):
+    """
+    Performs gauss jordan elimination with partial pivoting on a system of
+    linear equations.
+    :param system: system of linear equations.
+    :return: a [n, 1] matrix (vector) containing result.
+    """
+    system = system.as_mutable()
+    n = system.shape[0]
+    # iterate over rows
+    for i in range(0, n):
+        # find maximum magnitude and index in this column
+        max_mag, max_ind = _get_max_elem(system, i)
+        # swap current row with the row found to have the maximum element
+        system.row_swap(max_ind, i)
+        # normalize current row
+        system.row_op(i, lambda u,v: u / system[i,i])
+        # forward elimination, iterate over remaining rows and eliminate
+        for j in range(i + 1, n):
+            _forward_eliminate(system, i, j)
+        # forward elimination, iterate over previous rows and eliminate
+        for j in range(i - 1, -1, -1):
+            _forward_eliminate(system, i, j)
+    # return last column reversed
+    return sympy.Matrix(system.col(system.shape[0]))
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
