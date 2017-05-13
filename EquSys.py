@@ -23,14 +23,28 @@ def _back_sub(tri_mat: sympy.Matrix):
     :param tri_mat: augmented triangular matrix.
     :return: a [n, 1] matrix containing result.
     """
-    # TODO: Check if scaling is necessary
     n = tri_mat.shape[0]
     x = sympy.zeros(n, 1)
-    x[n - 1] = tri_mat[n - 1, n] / tri_mat[n - 1, n - 1]
-    for i in range(n - 2, -1, -1):
+    for i in range(n - 1, -1, -1):
         s = 0
         for j in range(i + 1, n):
-            s += tri_mat[i, j] * x[j, 0]
+            s += tri_mat[i, j] * x[j]
+        x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
+    return x
+
+
+def forward_sub(tri_mat: sympy.Matrix):
+    """
+    Performs forward substitution on an augmented lower triangular matrix.
+    :param tri_mat: augmented triangular matrix.
+    :return: a [n, 1] matrix containing result.
+    """
+    n = tri_mat.shape[0]
+    x = sympy.zeros(n, 1)
+    for i in range(0, n):
+        s = 0
+        for j in range(i - 1, -1, -1):
+            s += tri_mat[i, j] * x[j]
         x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
     return x
 
@@ -42,7 +56,6 @@ def gauss(system: sympy.Matrix):
     :param system: system of linear equations.
     :return: a [n, 1] matrix containing result.
     """
-    system = system.as_mutable()
     n = system.shape[0]
     # iterate over columns
     for i in range(0, n):
@@ -58,6 +71,14 @@ def gauss(system: sympy.Matrix):
             _forward_eliminate(system, i, j)
     # perform back substitution.
     return _back_sub(system)
+
+
+def lu(system: sympy.Matrix):
+    system = system.as_mutable()
+    n = system.shape[0]
+    l = u = sympy.zeros(n, n)
+    pass
+
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
@@ -79,9 +100,9 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """
 
     n = A.shape[0]
-    if b == None:
+    if b is None:
         A, b = [A[:, :-1], A[:, -1]]
-    if x == None:
+    if x is None:
         x = sympy.Matrix.zeros(n, 1)
     D = A.multiply_elementwise(sympy.Matrix.eye(n))
     x_prev = x[:, :]
@@ -97,6 +118,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
         if err < max_err:
             return sympy.N(x), sympy.N(x_hist), err_hist
     return sympy.N(x), sympy.N(x_hist), err_hist
+
 
 def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """Gauss-Seidel Iterative Method for Solving A System of Linear Equations:
@@ -117,9 +139,9 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     3) The list err_hist containing the values of the error during each iteration.
     """
     n = A.shape[0]
-    if b == None:
+    if b is None:
         A, b = [A[:, :-1], A[:, -1]]
-    if x == None:
+    if x is None:
         x = sympy.Matrix.zeros(n, 1)
     print(A)
     print(b)
@@ -136,7 +158,7 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
         x_hist = x_hist.row_join(x)
         diff = (x - x_prev).applyfunc(abs)
         err = max(max(diff.tolist()))
-    #    print(x_prev)
+        #    print(x_prev)
         err_hist.append(err.evalf())
         x_prev = x[:, :]
         if err < max_err:
