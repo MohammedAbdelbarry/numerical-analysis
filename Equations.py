@@ -1,3 +1,6 @@
+"""Root Finding Methods:
+A collection of methods to find roots of equations.
+"""
 import sympy
 
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=100):
