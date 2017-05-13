@@ -26,7 +26,7 @@ def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=100):
         output = output.col_join(sympy.Matrix([[xr, err]]))
         if err <= max_err:
             return output
-    return output
+    return sympy.N(output, 6)
 
 
 def bisection(f, xl, xu, max_err=1e-5, max_iter=100):
@@ -51,7 +51,7 @@ def bisection(f, xl, xu, max_err=1e-5, max_iter=100):
         output = output.col_join(sympy.Matrix([[xr, err]]))
         if err <= max_err:
             return output
-    return output
+    return sympy.N(output, 6)
 
 
 def newton(f, f_diff, xi, max_err=1e-5, max_iter=100):
@@ -66,7 +66,7 @@ def newton(f, f_diff, xi, max_err=1e-5, max_iter=100):
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
             return output
-    return output
+    return sympy.N(output, 6)
 
 
 def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=100):
@@ -81,7 +81,7 @@ def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=100):
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
             return output
-    return output
+    return sympy.N(output, 6)
 
 
 def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=100):
@@ -97,7 +97,7 @@ def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=100):
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
             return output
-    return output
+    return sympy.N(output, 6)
 
 
 def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
@@ -113,10 +113,19 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
             return output
-    return output
+    return sympy.N(output, 6)
 
-
-sympy.init_printing()
+def fixed_point(f, xi, max_err=1e-5, max_iter=100):
+    output = sympy.Matrix([[0, 0]])
+    output.row_del(0)
+    for _ in range(1, max_iter):
+        root = xi - f(xi)
+        err = abs((root - xi))
+        xi = root
+        output = output.col_join(sympy.Matrix([[root, err]]))
+        if err <= max_err:
+            return output
+    return sympy.N(output, 6)
 
 if __name__ == '__main__':
     # print("""Please Select A Method:
@@ -145,6 +154,7 @@ if __name__ == '__main__':
     # print("Regula Falsi:", regula_falsi(f, 1.5, 2.2, 1e-5, 100))
     # print("Bisection:", bisection(f, 1.5, 2.2, 1e-5, 100))
     print("Newton:", newton(f, g, 2.2))
+    print("Fixed Point:", fixed_point(f, 0.1))
     print("Secant:", secant(f, 1.5, 2.2))
     print("Modified Newton #1:", newton_mod1(f, g, 2.2, 2))
     print("Modified Newton #2:", newton_mod2(f, g, h, 2.2))

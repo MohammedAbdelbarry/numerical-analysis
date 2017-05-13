@@ -60,10 +60,7 @@ def gauss(system: sympy.Matrix):
     # iterate over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = abs(system[i, i]), i
-        for j in range(i + 1, n):
-            if abs(system[j, i]) > max_mag:
-                max_mag, max_ind = abs(system[j, i]), j
+        max_mag, max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # forward elimination, iterate over remaining rows and eliminate
@@ -73,11 +70,40 @@ def gauss(system: sympy.Matrix):
     return _back_sub(system)
 
 
-def lu(system: sympy.Matrix):
+def _get_max_elem(system, i):
+    n = system.shape[0]
+    max_mag, max_ind = abs(system[i, i]), i
+    for j in range(i + 1, n):
+        if abs(system[j, i]) > max_mag:
+            max_mag, max_ind = abs(system[j, i]), j
+    return max_mag, max_ind
+
+
+def gauss_jordan(system: sympy.Matrix):
+    """
+    Performs gauss jordan elimination with partial pivoting on a system of
+    linear equations.
+    :param system: system of linear equations.
+    :return: a [n, 1] matrix (vector) containing result.
+    """
     system = system.as_mutable()
     n = system.shape[0]
-    l = u = sympy.zeros(n, n)
-    pass
+    # iterate over rows
+    for i in range(0, n):
+        # find maximum magnitude and index in this column
+        max_mag, max_ind = _get_max_elem(system, i)
+        # swap current row with the row found to have the maximum element
+        system.row_swap(max_ind, i)
+        # normalize current row
+        system.row_op(i, lambda u,v: u / system[i,i])
+        # forward elimination, iterate over remaining rows and eliminate
+        for j in range(i + 1, n):
+            _forward_eliminate(system, i, j)
+        # forward elimination, iterate over previous rows and eliminate
+        for j in range(i - 1, -1, -1):
+            _forward_eliminate(system, i, j)
+    # return last column reversed
+    return sympy.Matrix(system.col(system.shape[0]))
 
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
@@ -87,15 +113,18 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
 
     Keyword arguments:
     A: sympy.Matrix -- The augmented matrix representing the system if b = None
-    else the coefficients matrix.
-    b: sympy.Matrix -- The r.h.s matrix of the system.
+    else the coefficients matrix. A is an [n, n] matrix.
+    b: sympy.Matrix -- The r.h.s matrix of the system. b is an n-dimensional
+    vector.
     max_iter: int -- The maximum number of iterations to perform.
     max_err: float -- The maximum allowed error.
-    x: sympy.Matrix -- The initial value for the variables.
+    x: sympy.Matrix -- The initial value for the variables. x is an n-dimensional
+    vector.
 
     return:
-    1) The vector x containing the final approximate solution.
-    2) The matrix x_hist containing the values of x during each iteration.
+    1) The n-dimensional vector x containing the final approximate solution.
+    2) The [n, number_of_iterations] matrix x_hist containing the values
+    of x during each iteration.
     3) The list err_hist containing the values of the error during each iteration.
     """
 
@@ -127,15 +156,18 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
 
     Keyword arguments:
     A: sympy.Matrix -- The augmented matrix representing the system if b = None
-    else the coefficients matrix.
-    b: sympy.Matrix -- The r.h.s matrix of the system.
+    else the coefficients matrix. A is an [n, n] matrix.
+    b: sympy.Matrix -- The r.h.s matrix of the system. b is an n-dimensional
+    vector.
     max_iter: int -- The maximum number of iterations to perform.
     max_err: float -- The maximum allowed error.
-    x: sympy.Matrix -- The initial value for the variables.
+    x: sympy.Matrix -- The initial value for the variables. x is an n-dimensional
+    vector.
 
     return:
-    1) The vector x containing the final approximate solution.
-    2) The matrix x_hist containing the values of x during each iteration.
+    1) The n-dimensional vector x containing the final approximate solution.
+    2) The [n, number_of_iterations] matrix x_hist containing the values
+    of x during each iteration.
     3) The list err_hist containing the values of the error during each iteration.
     """
     n = A.shape[0]

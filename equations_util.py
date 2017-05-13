@@ -52,8 +52,6 @@ def equations_to_aug_matrix(equations: list):
     A, b, symbol_list = equations_to_matrices(equations)
     return A.row_join(b), symbol_list
 
-
-sympy.init_printing()
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 sympy.pprint(sympy.N(aug))
 x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
