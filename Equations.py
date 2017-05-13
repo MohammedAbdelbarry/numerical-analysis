@@ -1,6 +1,5 @@
 import sympy
 
-
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=100):
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
@@ -112,6 +111,7 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
             return output
     return output
 
+sympy.init_printing()
 #print("""Please Select A Method:
 #1) Newton-Raphson Method
 #2) Secant Method
