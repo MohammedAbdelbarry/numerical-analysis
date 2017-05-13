@@ -1,7 +1,7 @@
 import sympy
 
 
-def _forward_eliminate(system: sympy.Matrix, i, j):
+def _eliminate(system: sympy.Matrix, i, j):
     """
     Performs forward eliminates on a row inside a system of linear equations.
     :param system: linear equations system.
@@ -52,7 +52,7 @@ def gauss(system: sympy.Matrix):
         system.row_swap(max_ind, i)
         # forward elimination, iterate over remaining rows and eliminate
         for j in range(i + 1, n):
-            _forward_eliminate(system, i, j)
+            _eliminate(system, i, j)
     # perform back substitution.
     return _back_sub(system)
 
@@ -85,12 +85,36 @@ def gauss_jordan(system: sympy.Matrix):
         system.row_op(i, lambda u,v: u / system[i,i])
         # forward elimination, iterate over remaining rows and eliminate
         for j in range(i + 1, n):
-            _forward_eliminate(system, i, j)
+            _eliminate(system, i, j)
         # forward elimination, iterate over previous rows and eliminate
         for j in range(i - 1, -1, -1):
-            _forward_eliminate(system, i, j)
+            _eliminate(system, i, j)
     # return last column reversed
     return sympy.Matrix(system.col(system.shape[0]))
+
+
+def _decompose(a, indexMap):
+    n = a.shape[0]
+    for i in range(0, n):
+        # find maximum magnitude and index in this column
+        max_mag, max_ind = _get_max_elem(a, i)
+        indexMap[i], indexMap[max_ind] = indexMap[max_ind], indexMap[i]
+        for j in range(i + 1, n):
+            factor = a[indexMap[j], i] / a[indexMap[i], i]
+            a[indexMap[j], i] = factor
+            for k in range(i + 1, n):
+                a[indexMap[j], k] = a[indexMap[j], k] - factor * a[indexMap[i], k]
+
+def lu_decomp(system: sympy.Matrix):
+    # TODO: Check for sigularity.
+    system = system.as_mutable()
+    n = system.shape[0]
+    a = system[:, :n]
+    b = system[:, n]
+    indexMap = list(range(n))
+    _decompose(a, indexMap)
+
+    return
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
