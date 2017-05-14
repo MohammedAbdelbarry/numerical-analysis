@@ -102,7 +102,7 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QComboBox" name="method_selec">
+         <widget class="QComboBox" name="method_select">
           <property name="maximumSize">
            <size>
             <width>196</width>
@@ -142,6 +142,11 @@
           <item>
            <property name="text">
             <string>Secant</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>All methods</string>
            </property>
           </item>
          </widget>

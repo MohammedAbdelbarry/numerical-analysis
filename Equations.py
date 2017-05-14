@@ -5,6 +5,7 @@ import sympy
 from equations_util import *
 import numpy
 
+
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
@@ -69,6 +70,7 @@ def newton(f, f_diff, xi=0, max_err=1e-5, max_iter=50):
             return numpy.array(output).astype(numpy.float64)
     return numpy.array(output).astype(numpy.float64)
 
+
 def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=50):
     output = sympy.Matrix([[0, 0]])
     output.row_del(0)
@@ -115,6 +117,7 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=50):
             return numpy.array(output).astype(numpy.float64)
     return numpy.array(output).astype(numpy.float64)
 
+
 def fixed_point(f, xi=0, max_err=1e-5, max_iter=50):
     output = sympy.Matrix([[0, 0]])
     output.row_del(0)
@@ -127,6 +130,7 @@ def fixed_point(f, xi=0, max_err=1e-5, max_iter=50):
             return numpy.array(output).astype(numpy.float64)
     return numpy.array(output).astype(numpy.float64)
 
+
 def birge_vieta(expr, xi=0, max_err=1e-5, max_iter=50):
     poly = sympy.Poly(expr, expr.free_symbols)
     a = poly.all_coeffs()
@@ -138,18 +142,18 @@ def birge_vieta(expr, xi=0, max_err=1e-5, max_iter=50):
         err = 0
         print([sympy.N(x, 4) for x in a])
         for _ in range(0, max_iter):
-            #print(b, c)
+            # print(b, c)
             find_coeffs(a, b, c, xi)
-            #print(b, c)
+            # print(b, c)
             root = xi - b[m] / c[m - 1]
             err = abs((root - xi))
             xi = root
             print(sympy.N(xi, 4), sympy.N(err, 4), [sympy.N(x, 4) for x in b], [sympy.N(x, 4) for x in c])
-            #print(err)
+            # print(err)
             if err <= max_err:
                 break
-                #return numpy.array(output).astype(numpy.float64)
-        #return numpy.array(output).astype(numpy.float64)
+                # return numpy.array(output).astype(numpy.float64)
+        # return numpy.array(output).astype(numpy.float64)
         a = b[0: -1]
         print(m)
         m = len(a) - 1
@@ -157,13 +161,16 @@ def birge_vieta(expr, xi=0, max_err=1e-5, max_iter=50):
         roots.append(sympy.N(xi, 6))
     return roots
 
+
 def find_coeffs(a, b, c, xi):
     m = len(a) - 1
     c[0] = b[0] = a[0]
     for i in range(1, m + 1):
         print(i)
-        b[i] = a[i] + xi * b[i-1]
-        c[i] = b[i] + xi * c[i-1]
+        b[i] = a[i] + xi * b[i - 1]
+        c[i] = b[i] + xi * c[i - 1]
+
+
 if __name__ == '__main__':
     # print("""Please Select A Method:
     # 1) Newton-Raphson Method
@@ -190,14 +197,14 @@ if __name__ == '__main__':
     # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
     # g = lambda x: 3 * x ** 2 - 4 * x - 4
     # h = lambda x: 6 * x - 4
-    #output = regula_falsi(f, 1.5, 2.2, 1e-5, 100)
-    #print_table("Regula-Falsi", output[:, 0], f, output[:, 1], symbol)
-    #output = bisection(f, 1.5, 2.2, 1e-5, 100)
-    #print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
+    # output = regula_falsi(f, 1.5, 2.2, 1e-5, 100)
+    # print_table("Regula-Falsi", output[:, 0], f, output[:, 1], symbol)
+    # output = bisection(f, 1.5, 2.2, 1e-5, 100)
+    # print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
     output = newton(f, g, 2.2)
     print_table("Newton-Raphson", output[:, 0], f, output[:, 1], symbol)
-    #output = fixed_point(f, 0.1)
-    #print_table("Fixed Point", output[:, 0], f, output[:, 1], symbol)
+    # output = fixed_point(f, 0.1)
+    # print_table("Fixed Point", output[:, 0], f, output[:, 1], symbol)
     output = secant(f, 1.5, 2.2)
     print_table("Secant", output[:, 0], f, output[:, 1], symbol)
     output = newton_mod1(f, g, 2.2, 2)
