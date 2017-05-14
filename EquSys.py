@@ -1,7 +1,7 @@
 import sympy
 
 
-def _forward_eliminate(system: sympy.Matrix, i, j):
+def _eliminate(system: sympy.Matrix, i, j):
     """
     Performs forward eliminates on a row inside a system of linear equations.
     :param system: linear equations system.
@@ -17,7 +17,7 @@ def _forward_eliminate(system: sympy.Matrix, i, j):
     return system
 
 
-def _back_sub(tri_mat: sympy.Matrix):
+def _back_sub(tri_mat: sympy.Matrix, index_map=None):
     """
     Performs back substitution on an augmented upper triangular matrix.
     :param tri_mat: augmented triangular matrix.
@@ -25,28 +25,35 @@ def _back_sub(tri_mat: sympy.Matrix):
     """
     n = tri_mat.shape[0]
     x = sympy.zeros(n, 1)
+    if index_map is None:
+        index_map = list(range(n))
     for i in range(n - 1, -1, -1):
         s = 0
         for j in range(i + 1, n):
-            s += tri_mat[i, j] * x[j]
-        x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
+            s += tri_mat[index_map[i], j] * x[j]
+        x[i] = (tri_mat[index_map[i], n] - s) / tri_mat[index_map[i], i]
     return x
 
 
-def forward_sub(tri_mat: sympy.Matrix):
+def _forward_sub(a: sympy.Matrix, b:sympy.Matrix, index_map=None):
     """
-    Performs forward substitution on an augmented lower triangular matrix.
-    :param tri_mat: augmented triangular matrix.
+    Performs forward substitution on a lower triangular matrix.
+    :param a: triangular matrix, the coefficients of the variables.
+    :param b: r.h.s of the equations.
+    :param index_map: an array specifying the actual position of each row.
     :return: a [n, 1] matrix containing result.
     """
-    n = tri_mat.shape[0]
-    x = sympy.zeros(n, 1)
-    for i in range(0, n):
-        s = 0
-        for j in range(i - 1, -1, -1):
-            s += tri_mat[i, j] * x[j]
-        x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
-    return x
+    n = a.shape[0]
+    y = sympy.zeros(n, 1)
+    if index_map is None:
+        index_map = list(range(n))
+    y[index_map[0]] = b[index_map[0]]
+    for i in range(1, n):
+        sum = b[index_map[i]]
+        for j in range(0, i):
+            sum -= a[index_map[i], j] * y[index_map[j]]
+        y[index_map[i]] = sum
+    return y
 
 
 def gauss(system: sympy.Matrix):
@@ -60,12 +67,12 @@ def gauss(system: sympy.Matrix):
     # iterate over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = _get_max_elem(system, i)
+        max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # forward elimination, iterate over remaining rows and eliminate
         for j in range(i + 1, n):
-            _forward_eliminate(system, i, j)
+            _eliminate(system, i, j)
     # perform back substitution.
     return _back_sub(system)
 
@@ -76,7 +83,7 @@ def _get_max_elem(system, i):
     for j in range(i + 1, n):
         if abs(system[j, i]) > max_mag:
             max_mag, max_ind = abs(system[j, i]), j
-    return max_mag, max_ind
+    return max_ind
 
 
 def gauss_jordan(system: sympy.Matrix):
@@ -91,19 +98,48 @@ def gauss_jordan(system: sympy.Matrix):
     # iterate over rows
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = _get_max_elem(system, i)
+        max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # normalize current row
-        system.row_op(i, lambda u,v: u / system[i,i])
+        system.row_op(i, lambda u, v: u / system[i, i])
         # forward elimination, iterate over remaining rows and eliminate
         for j in range(i + 1, n):
-            _forward_eliminate(system, i, j)
+            _eliminate(system, i, j)
         # forward elimination, iterate over previous rows and eliminate
         for j in range(i - 1, -1, -1):
-            _forward_eliminate(system, i, j)
+            _eliminate(system, i, j)
     # return last column reversed
     return sympy.Matrix(system.col(system.shape[0]))
+
+
+def _decompose(a, indexMap):
+    n = a.shape[0]
+    # iterating over columns
+    for i in range(0, n):
+        # find maximum magnitude and index in this column
+        max_ind = _get_max_elem(a, i)
+        indexMap[i], indexMap[max_ind] = indexMap[max_ind], indexMap[i]
+        for j in range(i + 1, n):
+            # store the factor in-place in matrix a
+            factor = a[indexMap[j], i] / a[indexMap[i], i]
+            a[indexMap[j], i] = factor
+            # eliminate the current row by the calculated factor
+            for k in range(i + 1, n):
+                a[indexMap[j], k] -= factor * a[indexMap[i], k]
+    return a, indexMap
+
+
+def lu_decomp(system: sympy.Matrix):
+    # TODO: Check for sigularity.
+    system = system.as_mutable()
+    n = system.shape[0]
+    a = system[:, :n]
+    b = system[:, n]
+    indexMap = list(range(n))
+    a, indexMap = _decompose(a, indexMap)
+    y = _forward_sub(a, b, indexMap)
+    return _back_sub(a.row_join(y), indexMap)
 
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
