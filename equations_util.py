@@ -53,8 +53,8 @@ def equations_to_aug_matrix(equations: list):
     A, b, symbol_list = equations_to_matrices(equations)
     return A.row_join(b), symbol_list
 
-def print_table(method_name: str, x: List[float], f: function(float),
- err: List[float], symbol: sympy.Symbol):
+def print_table(method_name: str, x: list, f,
+ err: list, symbol: sympy.Symbol):
     print(method_name + ":")
     df = pandas.DataFrame({str(symbol): x,
                            "f(" + str(symbol) + ")": list(map(f, x)),
@@ -67,6 +67,21 @@ def print_table(method_name: str, x: List[float], f: function(float),
     df.to_csv(path_or_buf=method_name + '.csv')
     with open(method_name + '.html', 'w') as html_file:
         html_file.write(df.to_html())
+
+
+def string_to_lambda(expr_str: str):
+    expr = sympy.sympify(eqn)
+    free_symbols = expr.free_symbols
+    if len(free_symbols) != 1:
+        raise ValueError("The Expression Contains More Than One Variable")
+    symbol = free_symbols.pop()
+    f = sympy.utilities.lambdify(symbol, expr)
+    return f
+
+def diff(expr: sympy.Expr):
+    free_symbols = expr.free_symbols
+    symbol = free_symbols.pop()
+    return sympy.diff(expr, symbol)
 
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 sympy.pprint(sympy.N(aug))
