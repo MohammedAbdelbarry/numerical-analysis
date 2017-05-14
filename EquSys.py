@@ -17,7 +17,7 @@ def _eliminate(system: sympy.Matrix, i, j):
     return system
 
 
-def _back_sub(tri_mat: sympy.Matrix):
+def _back_sub(tri_mat: sympy.Matrix, index_map=None):
     """
     Performs back substitution on an augmented upper triangular matrix.
     :param tri_mat: augmented triangular matrix.
@@ -25,28 +25,35 @@ def _back_sub(tri_mat: sympy.Matrix):
     """
     n = tri_mat.shape[0]
     x = sympy.zeros(n, 1)
+    if index_map is None:
+        index_map = list(range(n))
     for i in range(n - 1, -1, -1):
         s = 0
         for j in range(i + 1, n):
-            s += tri_mat[i, j] * x[j]
-        x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
+            s += tri_mat[index_map[i], j] * x[j]
+        x[i] = (tri_mat[index_map[i], n] - s) / tri_mat[index_map[i], i]
     return x
 
 
-def _forward_sub(tri_mat: sympy.Matrix, index_map = None):
+def _forward_sub(a: sympy.Matrix, b:sympy.Matrix, index_map=None):
     """
-    Performs forward substitution on an augmented lower triangular matrix.
-    :param tri_mat: augmented triangular matrix.
+    Performs forward substitution on a lower triangular matrix.
+    :param a: triangular matrix, the coefficients of the variables.
+    :param b: r.h.s of the equations.
+    :param index_map: an array specifying the actual position of each row.
     :return: a [n, 1] matrix containing result.
     """
-    n = tri_mat.shape[0]
-    x = sympy.zeros(n, 1)
-    for i in range(0, n):
-        s = 0
-        for j in range(i - 1, -1, -1):
-            s += tri_mat[i, j] * x[j]
-        x[i] = (tri_mat[i, n] - s) / tri_mat[i, i]
-    return x
+    n = a.shape[0]
+    y = sympy.zeros(n, 1)
+    if index_map is None:
+        index_map = list(range(n))
+    y[index_map[0]] = b[index_map[0]]
+    for i in range(1, n):
+        sum = b[index_map[i]]
+        for j in range(0, i):
+            sum -= a[index_map[i], j] * y[index_map[j]]
+        y[index_map[i]] = sum
+    return y
 
 
 def gauss(system: sympy.Matrix):
@@ -69,6 +76,7 @@ def gauss(system: sympy.Matrix):
     # perform back substitution.
     return _back_sub(system)
 
+
 def _get_max_elem(system, i):
     n = system.shape[0]
     max_mag, max_ind = abs(system[i, i]), i
@@ -76,6 +84,7 @@ def _get_max_elem(system, i):
         if abs(system[j, i]) > max_mag:
             max_mag, max_ind = abs(system[j, i]), j
     return max_ind
+
 
 def gauss_jordan(system: sympy.Matrix):
     """
@@ -93,7 +102,7 @@ def gauss_jordan(system: sympy.Matrix):
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # normalize current row
-        system.row_op(i, lambda u,v: u / system[i,i])
+        system.row_op(i, lambda u, v: u / system[i, i])
         # forward elimination, iterate over remaining rows and eliminate
         for j in range(i + 1, n):
             _eliminate(system, i, j)
@@ -120,6 +129,7 @@ def _decompose(a, indexMap):
                 a[indexMap[j], k] -= factor * a[indexMap[i], k]
     return a, indexMap
 
+
 def lu_decomp(system: sympy.Matrix):
     # TODO: Check for sigularity.
     system = system.as_mutable()
@@ -128,25 +138,9 @@ def lu_decomp(system: sympy.Matrix):
     b = system[:, n]
     indexMap = list(range(n))
     a, indexMap = _decompose(a, indexMap)
+    y = _forward_sub(a, b, indexMap)
+    return _back_sub(a.row_join(y), indexMap)
 
-    # forward sub
-    y = sympy.zeros(n, 1)
-    y[indexMap[0]] = b[indexMap[0]]
-    for i in range(1, n):
-        sum = b[indexMap[i]]
-        for j in range(0, i):
-            sum -= a[indexMap[i], j] * y[indexMap[j]]
-        y[indexMap[i]] = sum
-
-    # back sub
-    x = sympy.zeros(n, 1)
-    x[n - 1] = y[indexMap[n - 1]] / a[indexMap[n - 1], n - 1]
-    for i in range(n - 2, -1, -1):
-        sum = 0
-        for j in range(i + 1, n):
-            sum += a[indexMap[i], j] * x[j]
-        x[i] = (y[indexMap[i]] - sum) / a[indexMap[i], i]
-    return x
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
