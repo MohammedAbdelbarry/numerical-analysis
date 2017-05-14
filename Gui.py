@@ -46,7 +46,7 @@ class EquationSolverUi(QMainWindow):
                 for method in self.method_list:
                     method(func, iter, eps, guesses)
             else:
-                self.method_list[self.method_list.currentIndex()](func, iter, eps, guesses)
+                self.method_list[self.method_select.currentIndex()](func, iter, eps, guesses)
         except ValueError as e:
             print(e)
 
