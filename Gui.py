@@ -16,7 +16,7 @@ class EquationSolverUi(QMainWindow):
 
     @staticmethod
     def extract_guesses(guesses):
-        return [float(guesses.strip()) for x in guesses.split(',')]
+        return [float(x) for x in str(guesses).strip().split(',')]
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
@@ -42,6 +42,8 @@ class EquationSolverUi(QMainWindow):
             print("Your guesses are incorrect you fucking asshole")
             return
         try:
+            # Clear all tabs and clear table and plots.
+            # For each method used, add a new tab with the name of the method and print the table in this tab.
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
                     method(func, iter, eps, guesses)
@@ -55,6 +57,7 @@ class EquationSolverUi(QMainWindow):
         if len(guesses) != 2:
             raise RuntimeError("There needs to be two guesses")
         bisection(f, guesses[0], guesses[1], eps, iter)
+        print("Bisection Selected Successfully!")
 
     @staticmethod
     def exec_fixed_point(f, iter, eps, guesses):
