@@ -33,7 +33,7 @@ def _back_sub(tri_mat: sympy.Matrix):
     return x
 
 
-def forward_sub(tri_mat: sympy.Matrix):
+def _forward_sub(tri_mat: sympy.Matrix, index_map = None):
     """
     Performs forward substitution on an augmented lower triangular matrix.
     :param tri_mat: augmented triangular matrix.
@@ -69,7 +69,6 @@ def gauss(system: sympy.Matrix):
     # perform back substitution.
     return _back_sub(system)
 
-
 def _get_max_elem(system, i):
     n = system.shape[0]
     max_mag, max_ind = abs(system[i, i]), i
@@ -77,7 +76,6 @@ def _get_max_elem(system, i):
         if abs(system[j, i]) > max_mag:
             max_mag, max_ind = abs(system[j, i]), j
     return max_mag, max_ind
-
 
 def gauss_jordan(system: sympy.Matrix):
     """
@@ -108,15 +106,19 @@ def gauss_jordan(system: sympy.Matrix):
 
 def _decompose(a, indexMap):
     n = a.shape[0]
+    # iterating over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
         max_mag, max_ind = _get_max_elem(a, i)
         indexMap[i], indexMap[max_ind] = indexMap[max_ind], indexMap[i]
         for j in range(i + 1, n):
+            # store the factor in-place in matrix a
             factor = a[indexMap[j], i] / a[indexMap[i], i]
             a[indexMap[j], i] = factor
+            # eliminate the current row by the calculated factor
             for k in range(i + 1, n):
-                a[indexMap[j], k] = a[indexMap[j], k] - factor * a[indexMap[i], k]
+                a[indexMap[j], k] -= factor * a[indexMap[i], k]
+    return a, indexMap
 
 def lu_decomp(system: sympy.Matrix):
     # TODO: Check for sigularity.
@@ -125,9 +127,26 @@ def lu_decomp(system: sympy.Matrix):
     a = system[:, :n]
     b = system[:, n]
     indexMap = list(range(n))
-    _decompose(a, indexMap)
-    
-    return
+    a, indexMap = _decompose(a, indexMap)
+
+    # forward sub
+    y = sympy.zeros(n, 1)
+    y[indexMap[0]] = b[indexMap[0]]
+    for i in range(1, n):
+        sum = b[indexMap[i]]
+        for j in range(0, i):
+            sum -= a[indexMap[i], j] * y[indexMap[j]]
+        y[indexMap[i]] = sum
+
+    # back sub
+    x = sympy.zeros(n, 1)
+    x[n - 1] = y[indexMap[n - 1]] / a[indexMap[n - 1], n - 1]
+    for i in range(n - 2, -1, -1):
+        sum = 0
+        for j in range(i + 1, n):
+            sum += a[indexMap[i], j] * x[j]
+        x[i] = (y[indexMap[i]] - sum) / a[indexMap[i], i]
+    return x
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
