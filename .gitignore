@@ -88,4 +88,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Project Specific Ignores:
 .idea
+*.csv

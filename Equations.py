@@ -2,7 +2,8 @@
 A collection of methods to find roots of equations.
 """
 import sympy
-
+from equations_util import *
+import numpy
 
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=100):
     if f(xl) * f(xu) > 0:
@@ -25,8 +26,8 @@ def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=100):
         prev_xr = xr
         output = output.col_join(sympy.Matrix([[xr, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 
 def bisection(f, xl, xu, max_err=1e-5, max_iter=100):
@@ -50,8 +51,8 @@ def bisection(f, xl, xu, max_err=1e-5, max_iter=100):
         prev_xr = xr
         output = output.col_join(sympy.Matrix([[xr, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 
 def newton(f, f_diff, xi, max_err=1e-5, max_iter=100):
@@ -65,8 +66,8 @@ def newton(f, f_diff, xi, max_err=1e-5, max_iter=100):
         xi = root
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 
 def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=100):
@@ -80,8 +81,8 @@ def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=100):
         xi = root
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 
 def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=100):
@@ -96,8 +97,8 @@ def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=100):
         xi = root
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 
 def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
@@ -112,8 +113,8 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=100):
         xi = root
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 def fixed_point(f, xi, max_err=1e-5, max_iter=100):
     output = sympy.Matrix([[0, 0]])
@@ -124,8 +125,8 @@ def fixed_point(f, xi, max_err=1e-5, max_iter=100):
         xi = root
         output = output.col_join(sympy.Matrix([[root, err]]))
         if err <= max_err:
-            return output
-    return sympy.N(output, 6)
+            return numpy.array(output).astype(numpy.float64)
+    return numpy.array(output).astype(numpy.float64)
 
 if __name__ == '__main__':
     # print("""Please Select A Method:
@@ -151,10 +152,17 @@ if __name__ == '__main__':
     # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
     # g = lambda x: 3 * x ** 2 - 4 * x - 4
     # h = lambda x: 6 * x - 4
-    # print("Regula Falsi:", regula_falsi(f, 1.5, 2.2, 1e-5, 100))
-    # print("Bisection:", bisection(f, 1.5, 2.2, 1e-5, 100))
-    print("Newton:", newton(f, g, 2.2))
-    print("Fixed Point:", fixed_point(f, 0.1))
-    print("Secant:", secant(f, 1.5, 2.2))
-    print("Modified Newton #1:", newton_mod1(f, g, 2.2, 2))
-    print("Modified Newton #2:", newton_mod2(f, g, h, 2.2))
+    #output = regula_falsi(f, 1.5, 2.2, 1e-5, 100)
+    #print_table("Regula-Falsi", output[:, 0], f, output[:, 1], symbol)
+    #output = bisection(f, 1.5, 2.2, 1e-5, 100)
+    #print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
+    output = newton(f, g, 2.2)
+    print_table("Newton-Raphson", output[:, 0], f, output[:, 1], symbol)
+    #output = fixed_point(f, 0.1)
+    #print_table("Fixed Point", output[:, 0], f, output[:, 1], symbol)
+    output = secant(f, 1.5, 2.2)
+    print_table("Secant", output[:, 0], f, output[:, 1], symbol)
+    output = newton_mod1(f, g, 2.2, 2)
+    print_table("Newton-Raphson Mod#1", output[:, 0], f, output[:, 1], symbol)
+    output = newton_mod2(f, g, h, 2.2)
+    print_table("Newton-Raphson Mod#2", output[:, 0], f, output[:, 1], symbol)
