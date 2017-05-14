@@ -2,7 +2,8 @@
 A module containing some equation parsing methods.
 """
 from EquSys import *
-
+import pandas
+import functools
 
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
@@ -52,8 +53,17 @@ def equations_to_aug_matrix(equations: list):
     A, b, symbol_list = equations_to_matrices(equations)
     return A.row_join(b), symbol_list
 
+def print_table(method_name, x, f, err, symbol):
+    print(method_name + ":")
+    df = pandas.DataFrame({str(symbol): x,
+                           "f(" + str(symbol) + ")": list(map(f, x)),
+                           "error": err})
+    df = df[[str(symbol), "f(" + str(symbol) + ")", "error"]]
+    print(df)
+    df.to_csv(path_or_buf=method_name + '.csv')
+
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 sympy.pprint(sympy.N(aug))
-x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
-sympy.pprint(x)
-print(len(err_hist))
+#x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
+#sympy.pprint(x)
+#print(len(err_hist))
