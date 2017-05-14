@@ -83,8 +83,8 @@ def diff(expr: sympy.Expr):
     symbol = free_symbols.pop()
     return sympy.diff(expr, symbol)
 
-aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
-sympy.pprint(sympy.N(aug))
+#aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
+#sympy.pprint(sympy.N(aug))
 #x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
 #sympy.pprint(x)
 #print(len(err_hist))
