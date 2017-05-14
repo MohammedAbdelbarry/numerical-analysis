@@ -60,7 +60,12 @@ def print_table(method_name, x, f, err, symbol):
                            "error": err})
     df = df[[str(symbol), "f(" + str(symbol) + ")", "error"]]
     print(df)
+    ### WE COULD ADD AN OPTION TO CHOOSE THE FILE NAME AND EXTENSION
+    ### available formats: HTML, CSV, PICKLE (Pickle Serializer)
+    ### LATEX, EXCEL, SQL, JSON, HDF,FEATHER and GBQ (Google BigQuery)
     df.to_csv(path_or_buf=method_name + '.csv')
+    html_file = open(method_name + '.html', 'w')
+    html_file.write(df.to_html())
 
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 sympy.pprint(sympy.N(aug))
