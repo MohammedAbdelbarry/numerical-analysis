@@ -62,9 +62,9 @@ def print_table(method_name: str, x: list, f,
                            "error": err})
     df = df[[str(symbol), "f(" + str(symbol) + ")", "error"]]
     print(df)
-    ### WE COULD ADD AN OPTION TO CHOOSE THE FILE NAME AND EXTENSION
-    ### available formats: HTML, CSV, PICKLE (Pickle Serializer)
-    ### LATEX, EXCEL, SQL, JSON, HDF,FEATHER and GBQ (Google BigQuery)
+    # WE COULD ADD AN OPTION TO CHOOSE THE FILE NAME AND EXTENSION
+    # available formats: HTML, CSV, PICKLE (Pickle Serializer)
+    # LATEX, EXCEL, SQL, JSON, HDF,FEATHER and GBQ (Google BigQuery)
     df.to_csv(path_or_buf=method_name + '.csv')
     with open(method_name + '.html', 'w') as html_file:
         html_file.write(df.to_html())
@@ -84,6 +84,7 @@ def diff(expr: sympy.Expr):
     free_symbols = expr.free_symbols
     symbol = free_symbols.pop()
     return sympy.diff(expr, symbol)
+
 
 if __name__ == '__main__':
     aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])

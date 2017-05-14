@@ -1,9 +1,9 @@
 """Root Finding Methods:
 A collection of methods to find roots of equations.
 """
-import sympy
-from equations_util import *
 import numpy
+
+from equations_util import *
 
 
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
@@ -137,39 +137,28 @@ def birge_vieta(expr, xi=0, max_err=1e-5, max_iter=50):
     roots = []
     m = len(a) - 1
     while m > 0:
-        b = [0] * (m + 1)
-        c = [0] * (m + 1)
+        b = numpy.zeros(m + 1, dtype=numpy.float64)
+        c = numpy.zeros(m + 1, dtype=numpy.float64)
         err = 0
-        print([sympy.N(x, 4) for x in a])
         for _ in range(0, max_iter):
-            # print(b, c)
             find_coeffs(a, b, c, xi)
-            # print(b, c)
             root = xi - b[m] / c[m - 1]
             err = abs((root - xi))
             xi = root
-            print(sympy.N(xi, 4), sympy.N(err, 4), [sympy.N(x, 4) for x in b], [sympy.N(x, 4) for x in c])
-            # print(err)
             if err <= max_err:
                 break
-                # return numpy.array(output).astype(numpy.float64)
-        # return numpy.array(output).astype(numpy.float64)
         a = b[0: -1]
-        print(m)
         m = len(a) - 1
-        print(m)
         roots.append(sympy.N(xi, 6))
-    return roots
+    return numpy.array(roots, dtype=numpy.float64)
 
 
 def find_coeffs(a, b, c, xi):
     m = len(a) - 1
     c[0] = b[0] = a[0]
     for i in range(1, m + 1):
-        print(i)
-        b[i] = a[i] + xi * b[i - 1]
-        c[i] = b[i] + xi * c[i - 1]
-
+        b[i] = a[i] + xi * b[i-1]
+        c[i] = b[i] + xi * c[i-1]
 
 if __name__ == '__main__':
     # print("""Please Select A Method:
@@ -179,7 +168,8 @@ if __name__ == '__main__':
     # 4) Regula-Falsi Method
     # 5) Modified Newton(With Known Multiplicity)
     # 6) Modified Newton(With Unknown Multiplicity)""")
-    print(birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), -3))
+    #print(birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), -3))
+    print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
     eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
     # var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
     # symbol = sympy.symbols(var)

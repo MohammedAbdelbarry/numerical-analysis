@@ -1,5 +1,5 @@
 import sympy
-
+import numpy
 
 def _eliminate(system: sympy.Matrix, i, j):
     """
@@ -26,7 +26,7 @@ def _back_sub(tri_mat: sympy.Matrix, index_map=None):
     n = tri_mat.shape[0]
     x = sympy.zeros(n, 1)
     if index_map is None:
-        index_map = list(range(n))
+        index_map = numpy.array(range(n), dtype=numpy.int)
     for i in range(n - 1, -1, -1):
         s = 0
         for j in range(i + 1, n):
@@ -46,7 +46,7 @@ def _forward_sub(a: sympy.Matrix, b:sympy.Matrix, index_map=None):
     n = a.shape[0]
     y = sympy.zeros(n, 1)
     if index_map is None:
-        index_map = list(range(n))
+        index_map = numpy.array(range(n), dtype=numpy.int)
     y[index_map[0]] = b[index_map[0]]
     for i in range(1, n):
         sum = b[index_map[i]]
@@ -136,7 +136,7 @@ def lu_decomp(system: sympy.Matrix):
     n = system.shape[0]
     a = system[:, :n]
     b = system[:, n]
-    indexMap = list(range(n))
+    indexMap = numpy.array(range(n), dtype=numpy.int)
     a, indexMap = _decompose(a, indexMap)
     y = _forward_sub(a, b, indexMap)
     return _back_sub(a.row_join(y), indexMap)
@@ -161,7 +161,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     1) The n-dimensional vector x containing the final approximate solution.
     2) The [n, number_of_iterations] matrix x_hist containing the values
     of x during each iteration.
-    3) The list err_hist containing the values of the error during each iteration.
+    3) The numpy array err_hist containing the values of the error during each iteration.
     """
 
     n = A.shape[0]
@@ -177,12 +177,14 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
         x = D.inv() * (b - (A - D) * x)
         x_hist = x_hist.row_join(x)
         diff = (x - x_prev).applyfunc(abs)
-        err = max(max(diff.tolist()))
-        err_hist.append(err.evalf())
+        err = numpy.amax(numpy.array(diff).astype(numpy.float64))
+        err_hist.append(err)
         x_prev = x[:, :]
         if err < max_err:
-            return sympy.N(x), sympy.N(x_hist), err_hist
-    return sympy.N(x), sympy.N(x_hist), err_hist
+            break
+    return numpy.array(x).astype(numpy.float64),
+    numpy.array(x_hist).astype(numpy.float64),
+    numpy.array(err_hist).astype(numpy.float64)
 
 
 def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
@@ -204,15 +206,13 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     1) The n-dimensional vector x containing the final approximate solution.
     2) The [n, number_of_iterations] matrix x_hist containing the values
     of x during each iteration.
-    3) The list err_hist containing the values of the error during each iteration.
+    3) The numpy array err_hist containing the values of the error during each iteration.
     """
     n = A.shape[0]
     if b is None:
         A, b = [A[:, :-1], A[:, -1]]
     if x is None:
         x = sympy.Matrix.zeros(n, 1)
-    print(A)
-    print(b)
     x_prev = x[:, :]
     err_hist = []
     x_hist = sympy.Matrix(x)
@@ -225,10 +225,11 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
                 x[i] = xi_new / A[i, i]
         x_hist = x_hist.row_join(x)
         diff = (x - x_prev).applyfunc(abs)
-        err = max(max(diff.tolist()))
-        #    print(x_prev)
-        err_hist.append(err.evalf())
+        err = numpy.amax(numpy.array(diff).astype(numpy.float64))
+        err_hist.append(err)
         x_prev = x[:, :]
         if err < max_err:
-            return sympy.N(x), sympy.N(x_hist), err_hist
-    return sympy.N(x), sympy.N(x_hist), err_hist
+            break
+    return numpy.array(x).astype(numpy.float64),
+    numpy.array(x_hist).astype(numpy.float64),
+    numpy.array(err_hist).astype(numpy.float64)
