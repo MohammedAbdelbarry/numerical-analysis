@@ -60,7 +60,7 @@ def gauss(system: sympy.Matrix):
     # iterate over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = _get_max_elem(system, i)
+        max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # forward elimination, iterate over remaining rows and eliminate
@@ -75,7 +75,7 @@ def _get_max_elem(system, i):
     for j in range(i + 1, n):
         if abs(system[j, i]) > max_mag:
             max_mag, max_ind = abs(system[j, i]), j
-    return max_mag, max_ind
+    return max_ind
 
 def gauss_jordan(system: sympy.Matrix):
     """
@@ -89,7 +89,7 @@ def gauss_jordan(system: sympy.Matrix):
     # iterate over rows
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = _get_max_elem(system, i)
+        max_ind = _get_max_elem(system, i)
         # swap current row with the row found to have the maximum element
         system.row_swap(max_ind, i)
         # normalize current row
@@ -109,7 +109,7 @@ def _decompose(a, indexMap):
     # iterating over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
-        max_mag, max_ind = _get_max_elem(a, i)
+        max_ind = _get_max_elem(a, i)
         indexMap[i], indexMap[max_ind] = indexMap[max_ind], indexMap[i]
         for j in range(i + 1, n):
             # store the factor in-place in matrix a
