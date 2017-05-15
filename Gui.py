@@ -20,9 +20,9 @@ class EquationSolverUi(QMainWindow):
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
-        func = iter = eps = guesses = None
+        expr = iter = eps = guesses = None
         try:
-            func = string_to_lambda(self.equ_line.text())
+            expr = string_to_expression(self.equ_line.text())
         except:
             print("Equation is invalid bruh")
             return
@@ -46,24 +46,24 @@ class EquationSolverUi(QMainWindow):
             # For each method used, add a new tab with the name of the method and print the table in this tab.
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    method(func, iter, eps, guesses)
+                    method(expr, iter, eps, guesses)
             else:
-                self.method_list[self.method_select.currentIndex()](func, iter, eps, guesses)
+                self.method_list[self.method_select.currentIndex()](expr, iter, eps, guesses)
         except ValueError as e:
             print(e)
 
     @staticmethod
-    def exec_bisection(f, iter, eps, guesses):
+    def exec_bisection(expr, iter, eps, guesses):
         if len(guesses) != 2:
             raise RuntimeError("There needs to be two guesses")
-        bisection(f, guesses[0], guesses[1], eps, iter)
+        bisection(expr, guesses, eps, iter)
         print("Bisection Selected Successfully!")
 
     @staticmethod
-    def exec_fixed_point(f, iter, eps, guesses):
+    def exec_fixed_point(expr, iter, eps, guesses):
         if len(guesses) != 1:
             raise RuntimeError("There needs to be one guess")
-        fixed_point(f, guesses[0], eps, iter)
+        fixed_point(expr, guesses, eps, iter)
 
     def exec_newton(self, f, iter, eps, guesses):
         pass

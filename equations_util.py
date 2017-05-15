@@ -85,6 +85,12 @@ def string_to_lambda(expr_str: str):
     f = sympy.utilities.lambdify(symbol, expr)
     return f
 
+def string_to_expression(expr_str: str):
+    expr = sympy.sympify(expr_str)
+    free_symbols = expr.free_symbols
+    if len(free_symbols) != 1:
+        raise ValueError("The Expression Contains More Than One Variable")
+    return expr
 
 def diff(expr: sympy.Expr):
     symbol = get_symbol(expr)
@@ -92,10 +98,15 @@ def diff(expr: sympy.Expr):
 
 def expr_to_lambda(expr: sympy.Expr):
     symbol = get_symbol(expr)
+    if symbol == None:
+        val = expr.evalf()
+        return lambda x: val
     return sympy.lambdify(symbol, expr)
 
 def get_symbol(expr: sympy.Expr):
-    free_symbols = expr.free_symbols
+    free_symbols = expr.free_symbols.copy()
+    if len(free_symbols) == 0:
+        return None
     return free_symbols.pop()
 #aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 #sympy.pprint(sympy.N(aug))
