@@ -86,9 +86,21 @@ def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=50):
     return numpy.array(output).astype(numpy.float64)
 
 
-def newton_mod2(f, f_diff, f_diff2, xi=0, max_err=1e-5, max_iter=50):
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=50):
+    assert len(xi) == 1
+    xi = xi[0]
+    f = output.function = expr_to_lambda(expr)
+    expr_diff = diff(expr)
+    f_diff = output.boundary_function = expr_to_lambda(expr_diff)
+
+    symbol = get_symbol(expr)
+    output = Output()
+    output.roots = []
+    output.errors = []
+    output.title = "Fixed-Point"
+    cur_xi = []
+    cur_err_i = []
+
     for _ in range(0, max_iter):
         fxi = f(xi)
         f_diff_xi = f_diff(xi)
@@ -102,9 +114,19 @@ def newton_mod2(f, f_diff, f_diff2, xi=0, max_err=1e-5, max_iter=50):
     return numpy.array(output).astype(numpy.float64)
 
 
-def secant(f, xi, xi_prev, max_err=1e-5, max_iter=50):
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+def secant(f, xi, max_err=1e-5, max_iter=50):
+    assert len(xi) == 2
+    xi, xi_prev = xi[0], xi[1]
+    f = expr_to_lambda(expr)
+    symbol = get_symbol(expr)
+    output = Output()
+    output.roots = []
+    output.errors = []
+    output.function = f
+    output.boundary_function = lambda x: x
+    output.title = "Fixed-Point"
+    cur_xi = []
+    cur_err_i = []
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_prev = f(xi_prev)
@@ -112,34 +134,51 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=50):
         err = abs((root - xi))
         xi_prev = xi
         xi = root
-        output = output.col_join(sympy.Matrix([[root, err]]))
+        cur_xi.append(root)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(root)
+    output.roots.append(xi)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
-def fixed_point(f, xi, max_err=1e-5, max_iter=50):
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+def fixed_point(expr, xi, max_err=1e-5, max_iter=50):
+    assert len(xi) == 1
+    xi = xi[0]
+    f = expr_to_lambda(expr)
+    symbol = get_symbol(expr)
+    output = Output()
+    _init_output(output, "Fixed-Point", f, lambda x: x)
+    cur_xi = []
+    cur_err_i = []
     for _ in range(0, max_iter):
         root = xi - f(xi)
         err = abs((root - xi))
         xi = root
-        output = output.col_join(sympy.Matrix([[root, err]]))
+        cur_xi.append(root)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(root)
+    output.roots.append(xi)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 def birge_vieta(expr, xi, max_err=1e-5, max_iter=50):
+    assert len(xi) == 1
+    xi = xi[0]
     output = Output()
-    free_symbols = expr.free_symbols
-    symbol = free_symbols.pop()
-    output.title = "Birge-Vieta"
+    symbol = get_symbol(expr)
+    _init_output(output, "Birge-Vieta", expr_to_lambda(expr),
+     expr_to_lambda(diff(expr)))
     poly = sympy.Poly(expr, expr.free_symbols)
-    output.function = expr_to_lambda(expr)
-    output.boundary_function = expr_to_lambda(diff(expr))
     a = poly.all_coeffs()
-    output.roots = []
-    output.errors = []
+
     m = len(a) - 1
     n = m + 1
     i = 1
@@ -167,6 +206,13 @@ def birge_vieta(expr, xi, max_err=1e-5, max_iter=50):
     output.roots = numpy.array(output.roots).astype(numpy.float64)
     output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
+
+def _init_output(output: Output, method_name: str, f, f_bound):
+    output.roots = []
+    output.errors = []
+    output.title = method_name
+    output.function = f
+    output.boundary_function = f_bound
 
 def find_coeffs(a, b, c, xi):
     m = len(a) - 1

@@ -84,15 +84,17 @@ def string_to_lambda(expr_str: str):
     return f
 
 def diff(expr: sympy.Expr):
-    free_symbols = expr.free_symbols
-    symbol = free_symbols.pop()
+    symbol = get_symbol(expr)
     return sympy.diff(expr, symbol)
 
 def expr_to_lambda(expr: sympy.Expr):
-    free_symbols = expr.free_symbols
-    symbol = free_symbols.pop()
+    symbol = get_symbol(expr)
     print(expr.free_symbols)
     return sympy.lambdify(symbol, expr)
+
+def get_symbol(expr: sympy.Expr):
+    free_symbols = expr.free_symbols
+    return free_symbols.pop()
 #aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 #sympy.pprint(sympy.N(aug))
 #x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
