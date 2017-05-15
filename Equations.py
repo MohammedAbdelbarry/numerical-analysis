@@ -7,6 +7,7 @@ import matplotlib.pyplot
 import timeit
 from equations_util import *
 
+
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 2
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
@@ -204,6 +205,7 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     return output
 
+
 def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 1
     xi = arguments[0]
@@ -229,13 +231,14 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     return output
 
+
 def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 1
     xi = arguments[0]
     output = Output()
     symbol = get_symbol(expr)
     _init_output(output, "Birge-Vieta", expr_to_lambda(expr),
-     expr_to_lambda(diff(expr)))
+                 expr_to_lambda(diff(expr)))
     poly = sympy.Poly(expr, expr.free_symbols)
     a = poly.all_coeffs()
     m = len(a) - 1
@@ -267,6 +270,7 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     return output
 
+
 def _init_output(output: Output, method_name: str, f, f_bound):
     output.roots = []
     output.errors = []
@@ -279,8 +283,9 @@ def find_coeffs(a, b, c, xi):
     m = len(a) - 1
     c[0] = b[0] = a[0]
     for i in range(1, m + 1):
-        b[i] = a[i] + xi * b[i-1]
-        c[i] = b[i] + xi * c[i-1]
+        b[i] = a[i] + xi * b[i - 1]
+        c[i] = b[i] + xi * c[i - 1]
+
 
 if __name__ == '__main__':
     # print("""Please Select A Method:
@@ -318,20 +323,20 @@ if __name__ == '__main__':
     print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
-    #print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
-    #eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
-    # var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
-    # symbol = sympy.symbols(var)
-    #expr = sympy.sympify(eqn)
-    #free_symbols = expr.free_symbols
-    #if len(free_symbols) != 1:
-    #    raise ValueError("The Expression Contains More Than One Variable")
-    #symbol = free_symbols.pop()
-    #expr_diff = sympy.diff(expr, symbol)
-    #expr_diff2 = sympy.diff(expr_diff, symbol)
-    #f = sympy.utilities.lambdify(symbol, expr)
-    #g = sympy.utilities.lambdify(symbol, expr_diff)
-    #h = sympy.utilities.lambdify(symbol, expr_diff2)
-    # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
-    # g = lambda x: 3 * x ** 2 - 4 * x - 4
-    # h = lambda x: 6 * x - 4
+        # print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
+        # eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
+        # var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
+        # symbol = sympy.symbols(var)
+        # expr = sympy.sympify(eqn)
+        # free_symbols = expr.free_symbols
+        # if len(free_symbols) != 1:
+        #    raise ValueError("The Expression Contains More Than One Variable")
+        # symbol = free_symbols.pop()
+        # expr_diff = sympy.diff(expr, symbol)
+        # expr_diff2 = sympy.diff(expr_diff, symbol)
+        # f = sympy.utilities.lambdify(symbol, expr)
+        # g = sympy.utilities.lambdify(symbol, expr_diff)
+        # h = sympy.utilities.lambdify(symbol, expr_diff2)
+        # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
+        # g = lambda x: 3 * x ** 2 - 4 * x - 4
+        # h = lambda x: 6 * x - 4
