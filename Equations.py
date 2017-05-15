@@ -33,12 +33,18 @@ def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
     return numpy.array(output).astype(numpy.float64)
 
 
-def bisection(f, xl, xu, max_err=1e-5, max_iter=50):
+def bisection(expr, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 2
+    xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
     prev_xr = 0
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+    f = expr_to_lambda(expr)
+    symbol = get_symbol(expr)
+    output = Output()
+    _init_output(output, "Secant", f, expr_to_lambda(diff(expr)))
+    cur_xi = []
+    cur_err_i = []
     for _ in range(0, max_iter):
         yl = f(xl)
         yu = f(xu)
@@ -58,24 +64,38 @@ def bisection(f, xl, xu, max_err=1e-5, max_iter=50):
     return numpy.array(output).astype(numpy.float64)
 
 
-def newton(f, f_diff, xi=0, max_err=1e-5, max_iter=50):
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+def newton(expr, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 1
+    xi = arguments[0]
+    f = expr_to_lambda(expr)
+    expr_diff = diff(expr)
+    f_diff = expr_to_lambda(expr_diff)
+    symbol = get_symbol(expr)
+    output = Output()
+    _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
+    cur_xi = []
+    cur_err_i = []
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_diff = f_diff(xi)
         root = xi - fxi / fxi_diff
         err = abs((root - xi))
         xi = root
-        output = output.col_join(sympy.Matrix([[root, err]]))
+        cur_xi.append(root)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(root)
+    output.roots.append(xi)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 
-def newton_mod1(f, f_diff, arguments, max_err=1e-5, max_iter=50):
-    assert len(xi) == 1
-    xi = xi[0]
+def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 2
+    xi, m = arguments[0], arguments[1]
     f = expr_to_lambda(expr)
     expr_diff = diff(expr)
     f_diff = expr_to_lambda(expr_diff)
@@ -90,13 +110,19 @@ def newton_mod1(f, f_diff, arguments, max_err=1e-5, max_iter=50):
         root = xi - m * fxi / fxi_diff
         err = abs((root - xi))
         xi = root
-        output = output.col_join(sympy.Matrix([[root, err]]))
+        cur_xi.append(root)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(root)
+    output.roots.append(xi)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 
-def newton_mod2(f, arguments, max_err=1e-5, max_iter=50):
+def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 1
     xi = arguments[0]
     f = expr_to_lambda(expr)
@@ -127,7 +153,7 @@ def newton_mod2(f, arguments, max_err=1e-5, max_iter=50):
     return output
 
 
-def secant(f, arguments, max_err=1e-5, max_iter=50):
+def secant(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 2
     xi, xi_prev = arguments[0], arguments[1]
     f = expr_to_lambda(expr)
