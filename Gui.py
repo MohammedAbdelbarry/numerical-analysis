@@ -6,7 +6,7 @@ from pandas import DataFrame
 from Equations import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, \
-    QVBoxLayout
+    QVBoxLayout, QLineEdit, QLabel
 from PyQt5.uic import loadUi
 
 
@@ -46,7 +46,7 @@ class EquationSolverUi(QMainWindow):
         super(EquationSolverUi, self).__init__(*args)
         loadUi('part1.ui', self)
         self.method_list = [bisection, fixed_point, newton, newton_mod1,
-                            newton_mod2, regula_falsi, secant]
+                            newton_mod2, regula_falsi, secant, birge_vieta]
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
         self.figs = [(plt.Figure(), self.func_plot, self.func_tab), (plt.Figure(), self.error_plot, self.error_tab)]
@@ -96,11 +96,19 @@ class EquationSolverUi(QMainWindow):
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
                     out = method(expr, guesses, eps, iter)
-                    self.tabWidget_2.addTab(self._setup_out_tab(out), out.title)
+                    if len(out.dataframes > 1):
+                        for i in range(0, len(out.dataframes)):
+                            self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
+                    else:
+                        self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
                 out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
-                self.tabWidget_2.addTab(self._setup_out_tab(out), out.title)
-                self.update_plots(out)
+                if len(out.dataframes) > 1:
+                    for i in range(0, len(out.dataframes)):
+                        self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
+                else:
+                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+                    self.update_plots(out)
         except Exception as e:
             self.show_error_msg(str(e))
 
@@ -112,14 +120,35 @@ class EquationSolverUi(QMainWindow):
     pass
 
     @staticmethod
-    def _setup_out_tab(out: Output):
+    def _setup_tab(out: Output, index=None):
         new_tab = QWidget()
-        layout = QVBoxLayout()
+        vbox_layout = QVBoxLayout()
+        form_layout = QFormLayout()
         view = QTableView()
+
         model = PandasModel(out.dataframes[0])
+        root_label = QLabel()
+        root_label.setText("Root: " + str(out.roots[0]))
+        error_label = QLabel()
+        error_label.setText("Error: " + str(out.errors[0]))
+        exec_time_label = QLabel()
+        exec_time_label.setText("Execution Time: " + str(out.execution_time))
+        error_bound_label = QLabel()
+        error_bound_label.setText("Error bound: " + str(out.error_bound))
+        if index is not None:
+            model = PandasModel(out.dataframes[index])
+            root_label.setText("Root: " + str(out.roots[index]))
+            error_label.setText("Error: " + str(out.errors[index]))
+
+        form_layout.addWidget(root_label)
+        form_layout.addWidget(error_label)
+        form_layout.addWidget(exec_time_label)
+        form_layout.addWidget(error_bound_label)
+        
         view.setModel(model)
-        layout.addWidget(view)
-        new_tab.setLayout(layout)
+        vbox_layout.addWidget(view)
+        vbox_layout.addLayout(form_layout)
+        new_tab.setLayout(vbox_layout)
         return new_tab
 
     def clear(self):
