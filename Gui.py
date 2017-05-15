@@ -90,7 +90,7 @@ class EquationSolverUi(QMainWindow):
         if len(guesses) != 2:
             raise RuntimeError("There needs to be two guesses")
         return bisection(expr, guesses, eps, iter)
-        
+
     @staticmethod
     def exec_fixed_point(expr, iter, eps, guesses):
         if len(guesses) != 1:
@@ -119,7 +119,7 @@ class EquationSolverUi(QMainWindow):
 
     @staticmethod
     def exec_birge_vieta(expr, iter, eps, guesses):
-        return birge_vieta(expr, iter, eps, guesses)
+        return birge_vieta(expr, guesses, eps, iter)
 
 
 def _setup_tab(out : Output):
