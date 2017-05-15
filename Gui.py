@@ -99,8 +99,10 @@ class EquationSolverUi(QMainWindow):
     @staticmethod
     def _setup_tab(out: Output, index=None):
         new_tab = QWidget()
-        layout = QVBoxLayout()
+        vbox_layout = QVBoxLayout()
+        form_layout = QFormLayout()
         view = QTableView()
+
         model = PandasModel(out.dataframes[0])
         root_label = QLabel()
         root_label.setText("Root: " + str(out.roots[0]))
@@ -108,16 +110,22 @@ class EquationSolverUi(QMainWindow):
         error_label.setText("Error: " + str(out.errors[0]))
         exec_time_label = QLabel()
         exec_time_label.setText("Execution Time: " + str(out.execution_time))
+        error_bound_label = QLabel()
+        error_bound_label.setText("Error bound: " + str(out.error_bound))
         if index is not None:
             model = PandasModel(out.dataframes[index])
             root_label.setText("Root: " + str(out.roots[index]))
             error_label.setText("Error: " + str(out.errors[index]))
+
+        form_layout.addWidget(root_label)
+        form_layout.addWidget(error_label)
+        form_layout.addWidget(exec_time_label)
+        form_layout.addWidget(error_bound_label)
+        
         view.setModel(model)
-        layout.addWidget(view)
-        layout.addWidget(root_label)
-        layout.addWidget(error_label)
-        layout.addWidget(exec_time_label)
-        new_tab.setLayout(layout)
+        vbox_layout.addWidget(view)
+        vbox_layout.addLayout(form_layout)
+        new_tab.setLayout(vbox_layout)
         return new_tab
 
     def clear(self):
