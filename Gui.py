@@ -2,7 +2,7 @@ import sys
 from equations_util import *
 from Equations import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout
 from PyQt5.uic import loadUi
 
 
@@ -10,6 +10,7 @@ class PandasModel(QtCore.QAbstractTableModel):
     """
     Class to populate a table view with a pandas dataframe
     """
+
     def __init__(self, data, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self._data = data
@@ -40,9 +41,8 @@ class EquationSolverUi(QMainWindow):
     def __init__(self, *args):
         super(EquationSolverUi, self).__init__(*args)
         loadUi('part1.ui', self)
-        self.method_list = [self.exec_bisection, self.exec_fixed_point, self.exec_newton,
-                            self.exec_newton_mod1, self.exec_newton_mod2, self.exec_regula_falsi,
-                            self.exec_secant, self.exec_birge_vieta]
+        self.method_list = [bisection, fixed_point, newton, newton_mod1,
+                            newton_mod2, regula_falsi, secant]
         self.solve_btn.clicked.connect(self.solve_eq)
 
     @staticmethod
@@ -51,86 +51,57 @@ class EquationSolverUi(QMainWindow):
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
+        self.clear()
         expr = iter = eps = guesses = None
         try:
             expr = string_to_expression(self.equ_line.text())
         except:
-            print("Equation is invalid bruh")
+            self.show_error_msg("Error: Invalid Equation Format")
             return
         try:
             iter = int(self.iter_line.text())
         except ValueError:
-            print("Max iterations are invalid you lil' piece of shit")
+            self.show_error_msg("Error: Invalid Maximum Iterations Format")
             return
         try:
             eps = float(self.eps_line.text())
         except ValueError:
-            print("Epsilon is invalid you ugly shite")
+            self.show_error_msg("Error: Invalid Epsilon Format")
             return
         try:
             guesses = self.extract_guesses(self.guess_line.text())
         except:
-            print("Your guesses are incorrect you fucking asshole")
+            self.show_error_msg("Error: Invalid 'Guesses' Format")
             return
         try:
-            # Clear all tabs and clear table and plots.
-            self.tabWidget_2.clear()
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    out = method(expr, iter, eps, guesses)
-                    self.tabWidget_2.addTab(_setup_tab(out), out.title)
+                    out = method(expr, guesses, eps, iter)
+                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
-                out = self.method_list[self.method_select.currentIndex()](expr, iter, eps, guesses)
-                self.tabWidget_2.addTab(_setup_tab(out), out.title)
-        except ValueError as e:
-            print(e)
+                out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
+                self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+        except Exception as e:
+            self.show_error_msg(str(e))
+
+    def show_error_msg(self, msg):
+        self.error_msg.setText(msg)
 
     @staticmethod
-    def exec_bisection(expr, iter, eps, guesses):
-        if len(guesses) != 2:
-            raise RuntimeError("There needs to be two guesses")
-        return bisection(expr, guesses, eps, iter)
+    def _setup_tab(out: Output):
+        new_tab = QWidget()
+        layout = QVBoxLayout()
+        view = QTableView()
+        model = PandasModel(out.dataframes[0])
+        view.setModel(model)
+        layout.addWidget(view)
+        new_tab.setLayout(layout)
+        return new_tab
 
-    @staticmethod
-    def exec_fixed_point(expr, iter, eps, guesses):
-        if len(guesses) != 1:
-            raise RuntimeError("There needs to be one guess")
-        return fixed_point(expr, guesses, eps, iter)
-
-    @staticmethod
-    def exec_newton(expr, iter, eps, guesses):
-        return newton(expr, guesses, eps, iter)
-
-    @staticmethod
-    def exec_newton_mod1(expr, iter, eps, guesses):
-        return newton_mod1(expr, guesses, eps, iter)
-
-    @staticmethod
-    def exec_newton_mod2(expr, iter, eps, guesses):
-        return newton_mod2(expr, guesses, eps, iter)
-
-    @staticmethod
-    def exec_regula_falsi(expr, iter, eps, guesses):
-        return regula_falsi(expr, guesses, eps, iter)
-
-    @staticmethod
-    def exec_secant(expr, iter, eps, guesses):
-        return secant(expr, guesses, eps, iter)
-
-    @staticmethod
-    def exec_birge_vieta(expr, iter, eps, guesses):
-        return birge_vieta(expr, guesses, eps, iter)
-
-
-def _setup_tab(out : Output):
-    new_tab = QWidget()
-    layout = QFormLayout()
-    view = QTableView()
-    model = PandasModel(out.dataframes[0])
-    view.setModel(model)
-    layout.addWidget(view)
-    new_tab.setLayout(layout)
-    return new_tab
+    def clear(self):
+        self.error_msg.setText("")
+        self.tabWidget.clear()
+        self.tabWidget_2.clear()
 
 
 if __name__ == '__main__':

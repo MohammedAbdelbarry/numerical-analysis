@@ -250,6 +250,22 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QLabel" name="error_msg">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: red</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -273,7 +289,7 @@
      <x>0</x>
      <y>0</y>
      <width>1108</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
