@@ -42,7 +42,7 @@ class EquationSolverUi(QMainWindow):
         super(EquationSolverUi, self).__init__(*args)
         loadUi('part1.ui', self)
         self.method_list = [bisection, fixed_point, newton, newton_mod1,
-                            newton_mod2, regula_falsi, secant]
+                            newton_mod2, regula_falsi, secant, birge_vieta]
         self.solve_btn.clicked.connect(self.solve_eq)
 
     @staticmethod
@@ -77,10 +77,18 @@ class EquationSolverUi(QMainWindow):
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
                     out = method(expr, guesses, eps, iter)
-                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+                    if len(out.dataframes > 1):
+                        for i in range(0, len(out.dataframes)):
+                            self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
+                    else:
+                        self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
                 out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
-                self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+                if len(out.dataframes) > 1:
+                    for i in range(0, len(out.dataframes)):
+                        self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
+                else:
+                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
         except Exception as e:
             self.show_error_msg(str(e))
 
@@ -88,11 +96,13 @@ class EquationSolverUi(QMainWindow):
         self.error_msg.setText(msg)
 
     @staticmethod
-    def _setup_tab(out: Output):
+    def _setup_tab(out: Output, index=None):
         new_tab = QWidget()
         layout = QVBoxLayout()
         view = QTableView()
         model = PandasModel(out.dataframes[0])
+        if index is not None:
+            model = PandasModel(out.dataframes[index])
         view.setModel(model)
         layout.addWidget(view)
         new_tab.setLayout(layout)
