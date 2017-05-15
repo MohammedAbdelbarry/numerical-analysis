@@ -12,12 +12,14 @@ class Output:
     title: the name of the method used
     function: the function
     boundary_function: the boundary function
+    exection_time: a float representing the execution time
     """
     def __init__(self):
         self.dataframes = []
-        self.roots = None
-        self.errors = None
+        self.roots = numpy.empty(0, dtype=numpy.float64)
+        self.errors = numpy.empty(0, dtype=numpy.float64)
         self.error_bound = 0
         self.title = None
         self.function = None
         self.boundary_function = None
+        self.execution_time = 0

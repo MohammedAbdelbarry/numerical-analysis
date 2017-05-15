@@ -7,19 +7,18 @@ import matplotlib.pyplot
 
 from equations_util import *
 
-
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 2
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
+    f = expr_to_lambda(expr)
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
     prev_xr = 0
-    f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "bisection", f, expr_to_lambda(diff(expr)))
-    cur_xi = []
-    cur_err_i = []
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
     for _ in range(0, max_iter):
         yl = f(xl)
         yu = f(xu)
@@ -34,30 +33,28 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
             err = 0
         prev_xr = xr
         prev_xr = xr
-        cur_xi.append(xr)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, xr)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(xr)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, xr)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 
 def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 2
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
+    f = expr_to_lambda(expr)
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
     prev_xr = 0
-    f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "bisection", f, expr_to_lambda(diff(expr)))
-    cur_xi = []
-    cur_err_i = []
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
     for _ in range(0, max_iter):
         yl = f(xl)
         yu = f(xu)
@@ -71,15 +68,13 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
         else:
             err = 0
         prev_xr = xr
-        cur_xi.append(xr)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, xr)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(xr)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, xr)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 
@@ -92,23 +87,21 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Newton-Raphson", f, f_diff)
-    cur_xi = []
-    cur_err_i = []
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_diff = f_diff(xi)
         root = xi - fxi / fxi_diff
         err = abs((root - xi))
         xi = root
-        cur_xi.append(root)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, root)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(root)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, root)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 
@@ -121,23 +114,21 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Newton-Raphson Mod#1", f, f_diff)
-    cur_xi = []
-    cur_err_i = []
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_diff = f_diff(xi)
         root = xi - m * fxi / fxi_diff
         err = abs((root - xi))
         xi = root
-        cur_xi.append(root)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, root)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(root)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, root)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 
@@ -151,8 +142,8 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
-    cur_xi = []
-    cur_err_i = []
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
     for _ in range(0, max_iter):
         fxi = f(xi)
         f_diff_xi = f_diff(xi)
@@ -160,15 +151,13 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
         root = xi - f_diff_xi * fxi / (f_diff_xi ** 2 - fxi * f_diff_xi2)
         err = abs((root - xi))
         xi = root
-        cur_xi.append(root)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, root)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(root)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, root)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 
@@ -179,8 +168,8 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Secant", f, expr_to_lambda(diff(expr)))
-    cur_xi = []
-    cur_err_i = []
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_prev = f(xi_prev)
@@ -188,15 +177,13 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
         err = abs((root - xi))
         xi_prev = xi
         xi = root
-        cur_xi.append(root)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, root)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(root)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, root)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
@@ -206,21 +193,19 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Fixed-Point", f, lambda x: x)
-    cur_xi = []
-    cur_err_i = []
-    for _ in range(0, max_iter):
+    cur_xi = numpy.empty(0, dtype=numpy.float64)
+    cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    for i in range(0, max_iter):
         root = xi - f(xi)
         err = abs((root - xi))
         xi = root
-        cur_xi.append(root)
-        cur_err_i.append(err)
+        cur_xi = numpy.append(cur_xi, root)
+        cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
-    output.roots.append(root)
-    output.errors.append(err)
+    output.roots = numpy.append(output.roots, root)
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
 def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
@@ -236,8 +221,8 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
     n = m + 1
     i = 1
     while m > 0:
-        cur_xi = []
-        cur_err_i = []
+        cur_xi = numpy.empty(0, dtype=numpy.float64)
+        cur_err_i = numpy.empty(0, dtype=numpy.float64)
         b = numpy.zeros(m + 1, dtype=numpy.float64)
         c = numpy.zeros(m + 1, dtype=numpy.float64)
         err = 0
@@ -246,18 +231,16 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
             root = xi - b[m] / c[m - 1]
             err = abs((root - xi))
             xi = root
-            cur_xi.append(xi)
-            cur_err_i.append(err)
+            cur_xi = numpy.append(cur_xi, xi)
+            cur_err_i = numpy.append(cur_err_i, err)
             if err <= max_err:
                 break
         a = b[0: -1]
         m = len(a) - 1
         output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol, i))
         i += 1
-        output.roots.append(sympy.N(xi, 6))
-        output.errors.append(sympy.N(err, 6))
-    output.roots = numpy.array(output.roots).astype(numpy.float64)
-    output.errors = numpy.array(output.errors).astype(numpy.float64)
+        output.roots = numpy.append(output.roots, xi)
+        output.errors = numpy.append(output.errors, err)
     return output
 
 def _init_output(output: Output, method_name: str, f, f_bound):
@@ -286,20 +269,38 @@ if __name__ == '__main__':
     out = birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
     for df in out.dataframes:
         print(df)
+    out = newton(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    for df in out.dataframes:
+        print(df)
+    out = newton_mod1(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, 2])
+    for df in out.dataframes:
+        print(df)
+    out = newton_mod2(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    for df in out.dataframes:
+        print(df)
+    out = secant(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    for df in out.dataframes:
+        print(df)
+    out = bisection(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    for df in out.dataframes:
+        print(df)
+    out = regula_falsi(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    for df in out.dataframes:
+        print(df)
     #print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
-    eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
+    #eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
     # var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
     # symbol = sympy.symbols(var)
-    expr = sympy.sympify(eqn)
-    free_symbols = expr.free_symbols
-    if len(free_symbols) != 1:
-        raise ValueError("The Expression Contains More Than One Variable")
-    symbol = free_symbols.pop()
-    expr_diff = sympy.diff(expr, symbol)
-    expr_diff2 = sympy.diff(expr_diff, symbol)
-    f = sympy.utilities.lambdify(symbol, expr)
-    g = sympy.utilities.lambdify(symbol, expr_diff)
-    h = sympy.utilities.lambdify(symbol, expr_diff2)
+    #expr = sympy.sympify(eqn)
+    #free_symbols = expr.free_symbols
+    #if len(free_symbols) != 1:
+    #    raise ValueError("The Expression Contains More Than One Variable")
+    #symbol = free_symbols.pop()
+    #expr_diff = sympy.diff(expr, symbol)
+    #expr_diff2 = sympy.diff(expr_diff, symbol)
+    #f = sympy.utilities.lambdify(symbol, expr)
+    #g = sympy.utilities.lambdify(symbol, expr_diff)
+    #h = sympy.utilities.lambdify(symbol, expr_diff2)
     # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
     # g = lambda x: 3 * x ** 2 - 4 * x - 4
     # h = lambda x: 6 * x - 4
