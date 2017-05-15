@@ -2,7 +2,7 @@ import sys
 from equations_util import *
 from Equations import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout
 from PyQt5.uic import loadUi
 
 
@@ -51,6 +51,7 @@ class EquationSolverUi(QMainWindow):
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
+        self.clear()
         expr = iter = eps = guesses = None
         try:
             expr = string_to_expression(self.equ_line.text())
@@ -73,16 +74,14 @@ class EquationSolverUi(QMainWindow):
             self.show_error_msg("Error: Invalid 'Guesses' Format")
             return
         try:
-            # Clear all tabs and clear table and plots.
-            self.tabWidget_2.clear()
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    out = method(expr, guesses, iter, eps)
+                    out = method(expr, guesses, eps, iter)
                     self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
-                out = self.method_list[self.method_select.currentIndex()](expr, guesses, iter, eps)
+                out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
                 self.tabWidget_2.addTab(self._setup_tab(out), out.title)
-        except ValueError as e:
+        except Exception as e:
             self.show_error_msg(str(e))
 
     def show_error_msg(self, msg):
@@ -91,13 +90,18 @@ class EquationSolverUi(QMainWindow):
     @staticmethod
     def _setup_tab(out: Output):
         new_tab = QWidget()
-        layout = QFormLayout()
+        layout = QVBoxLayout()
         view = QTableView()
         model = PandasModel(out.dataframes[0])
         view.setModel(model)
         layout.addWidget(view)
         new_tab.setLayout(layout)
         return new_tab
+
+    def clear(self):
+        self.error_msg.setText("")
+        self.tabWidget.clear()
+        self.tabWidget_2.clear()
 
 
 if __name__ == '__main__':
