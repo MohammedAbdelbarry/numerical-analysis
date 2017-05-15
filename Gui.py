@@ -16,7 +16,7 @@ class EquationSolverUi(QMainWindow):
 
     @staticmethod
     def extract_guesses(guesses):
-        return [float(x) for x in str(guesses).strip().split(',')]
+        return [float(x.strip()) for x in str(guesses).strip().split(',')]
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
