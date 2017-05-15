@@ -77,11 +77,11 @@ class EquationSolverUi(QMainWindow):
             self.tabWidget_2.clear()
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    new_tab, tab_name = method(expr, iter, eps, guesses)
-                    self.tabWidget_2.addTab(new_tab, tab_name)
+                    out = method(expr, iter, eps, guesses)
+                    self.tabWidget_2.addTab(_setup_tab(out), out.title)
             else:
-                new_tab, tab_name = self.method_list[self.method_select.currentIndex()](expr, iter, eps, guesses)
-                self.tabWidget_2.addTab(new_tab, tab_name)
+                out = self.method_list[self.method_select.currentIndex()](expr, iter, eps, guesses)
+                self.tabWidget_2.addTab(_setup_tab(out), out.title)
         except ValueError as e:
             print(e)
 
@@ -89,46 +89,37 @@ class EquationSolverUi(QMainWindow):
     def exec_bisection(expr, iter, eps, guesses):
         if len(guesses) != 2:
             raise RuntimeError("There needs to be two guesses")
-        out = bisection(expr, guesses, eps, iter)
-        # print("Bisection Selected Successfully!")
-        return _setup_tab(out), out.title
-
+        return bisection(expr, guesses, eps, iter)
+        
     @staticmethod
     def exec_fixed_point(expr, iter, eps, guesses):
         if len(guesses) != 1:
             raise RuntimeError("There needs to be one guess")
-        out = fixed_point(expr, guesses, eps, iter)
-        return _setup_tab(out), out.title
+        return fixed_point(expr, guesses, eps, iter)
 
     @staticmethod
     def exec_newton(expr, iter, eps, guesses):
-        out = newton(expr, guesses, eps, iter)
-        return _setup_tab(out), out.title
+        return newton(expr, guesses, eps, iter)
 
     @staticmethod
     def exec_newton_mod1(expr, iter, eps, guesses):
-        out = newton_mod1(expr, guesses, eps, iter)
-        return _setup_tab(out), out.title
+        return newton_mod1(expr, guesses, eps, iter)
 
     @staticmethod
     def exec_newton_mod2(expr, iter, eps, guesses):
-        out = newton_mod2(expr, guesses, eps, iter)
-        return _setup_tab(out), out.title
+        return newton_mod2(expr, guesses, eps, iter)
 
     @staticmethod
     def exec_regula_falsi(expr, iter, eps, guesses):
-        out = regula_falsi(expr, guesses, eps, iter)
-        return _setup_tab(out), out.title
+        return regula_falsi(expr, guesses, eps, iter)
 
     @staticmethod
     def exec_secant(expr, iter, eps, guesses):
-        out = secant(expr, guesses, eps, iter)
-        return _setup_tab(out), out.title
+        return secant(expr, guesses, eps, iter)
 
     @staticmethod
     def exec_birge_vieta(expr, iter, eps, guesses):
-        out = birge_vieta(expr, iter, eps, guesses)
-        return _setup_tab(out), out.title
+        return birge_vieta(expr, iter, eps, guesses)
 
 
 def _setup_tab(out : Output):
