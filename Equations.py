@@ -4,6 +4,8 @@ A collection of methods to find roots of equations.
 import sympy
 from equations_util import *
 import numpy
+from part1_output import Output
+import matplotlib.pyplot
 
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
     if f(xl) * f(xu) > 0:
@@ -115,7 +117,7 @@ def secant(f, xi, xi_prev, max_err=1e-5, max_iter=50):
             return numpy.array(output).astype(numpy.float64)
     return numpy.array(output).astype(numpy.float64)
 
-def fixed_point(f, xi=0, max_err=1e-5, max_iter=50):
+def fixed_point(f, xi, max_err=1e-5, max_iter=50):
     output = sympy.Matrix([[0, 0]])
     output.row_del(0)
     for _ in range(0, max_iter):
@@ -127,12 +129,23 @@ def fixed_point(f, xi=0, max_err=1e-5, max_iter=50):
             return numpy.array(output).astype(numpy.float64)
     return numpy.array(output).astype(numpy.float64)
 
-def birge_vieta(expr, xi=0, max_err=1e-5, max_iter=50):
+def birge_vieta(expr, xi, max_err=1e-5, max_iter=50):
+    output = Output()
+    free_symbols = expr.free_symbols
+    symbol = free_symbols.pop()
+    output.title = "Birge-Vieta"
     poly = sympy.Poly(expr, expr.free_symbols)
+    output.function = expr_to_lambda(expr)
+    output.boundary_function = expr_to_lambda(diff(expr))
     a = poly.all_coeffs()
-    roots = []
+    output.roots = []
+    output.errors = []
     m = len(a) - 1
+    n = m + 1
+    i = 1
     while m > 0:
+        cur_xi = []
+        cur_err_i = []
         b = numpy.zeros(m + 1, dtype=numpy.float64)
         c = numpy.zeros(m + 1, dtype=numpy.float64)
         err = 0
@@ -141,12 +154,19 @@ def birge_vieta(expr, xi=0, max_err=1e-5, max_iter=50):
             root = xi - b[m] / c[m - 1]
             err = abs((root - xi))
             xi = root
+            cur_xi.append(xi)
+            cur_err_i.append(err)
             if err <= max_err:
                 break
         a = b[0: -1]
         m = len(a) - 1
-        roots.append(sympy.N(xi, 6))
-    return numpy.array(roots, dtype=numpy.float64)
+        output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol, i))
+        i += 1
+        output.roots.append(sympy.N(xi, 6))
+        output.errors.append(sympy.N(err, 6))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 def find_coeffs(a, b, c, xi):
     m = len(a) - 1
@@ -163,8 +183,10 @@ if __name__ == '__main__':
     # 4) Regula-Falsi Method
     # 5) Modified Newton(With Known Multiplicity)
     # 6) Modified Newton(With Unknown Multiplicity)""")
-    #print(birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), -3))
-    print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
+    out = birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), -3)
+    for df in out.dataframes:
+        print(df)
+    #print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
     eqn = input("Please Enter The Equation: ")  # Test Code (Just Enter x^2 - 4)
     # var = input("Please Enter The Name of The Variable: ")#Test Code (Use x as a symbol)
     # symbol = sympy.symbols(var)
@@ -175,7 +197,6 @@ if __name__ == '__main__':
     symbol = free_symbols.pop()
     expr_diff = sympy.diff(expr, symbol)
     expr_diff2 = sympy.diff(expr_diff, symbol)
-    print(expr.is_polynomial())
     f = sympy.utilities.lambdify(symbol, expr)
     g = sympy.utilities.lambdify(symbol, expr_diff)
     h = sympy.utilities.lambdify(symbol, expr_diff2)
@@ -184,8 +205,8 @@ if __name__ == '__main__':
     # h = lambda x: 6 * x - 4
     #output = regula_falsi(f, 1.5, 2.2, 1e-5, 100)
     #print_table("Regula-Falsi", output[:, 0], f, output[:, 1], symbol)
-    #output = bisection(f, 1.5, 2.2, 1e-5, 100)
-    #print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
+    output = bisection(f, 1, 2.2, 1e-5, 100)
+    print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
     output = newton(f, g, 2.2)
     print_table("Newton-Raphson", output[:, 0], f, output[:, 1], symbol)
     #output = fixed_point(f, 0.1)

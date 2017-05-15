@@ -4,6 +4,8 @@ A module containing some equation parsing methods.
 from EquSys import *
 import pandas
 import functools
+import matplotlib
+import sympy
 
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
@@ -53,21 +55,24 @@ def equations_to_aug_matrix(equations: list):
     A, b, symbol_list = equations_to_matrices(equations)
     return A.row_join(b), symbol_list
 
-def print_table(method_name: str, x: list, f,
- err: list, symbol: sympy.Symbol):
-    print(method_name + ":")
-    df = pandas.DataFrame({str(symbol): x,
-                           "f(" + str(symbol) + ")": list(map(f, x)),
-                           "error": err})
-    df = df[[str(symbol), "f(" + str(symbol) + ")", "error"]]
-    print(df)
+def create_dataframe(x: list, f,
+ err: list, symbol: sympy.Symbol, i=None):
+    sym_str = str(symbol)
+    err_str = "Error"
+    if i  != None:
+        sym_str += str(i)
+        err_str += str(i)
+    df = pandas.DataFrame({sym_str: x,
+                           "f(" + sym_str + ")": list(map(f, x)),
+                           err_str: err})
+    df = df[[sym_str, "f(" + sym_str + ")", err_str]]
     ### WE COULD ADD AN OPTION TO CHOOSE THE FILE NAME AND EXTENSION
     ### available formats: HTML, CSV, PICKLE (Pickle Serializer)
     ### LATEX, EXCEL, SQL, JSON, HDF,FEATHER and GBQ (Google BigQuery)
-    df.to_csv(path_or_buf=method_name + '.csv')
-    with open(method_name + '.html', 'w') as html_file:
-        html_file.write(df.to_html())
-
+    #df.to_csv(path_or_buf=method_name + '.csv')
+    #with open(method_name + '.html', 'w') as html_file:
+    #    html_file.write(df.to_html())
+    return df
 
 def string_to_lambda(expr_str: str):
     expr = sympy.sympify(eqn)
@@ -83,6 +88,11 @@ def diff(expr: sympy.Expr):
     symbol = free_symbols.pop()
     return sympy.diff(expr, symbol)
 
+def expr_to_lambda(expr: sympy.Expr):
+    free_symbols = expr.free_symbols
+    symbol = free_symbols.pop()
+    print(expr.free_symbols)
+    return sympy.lambdify(symbol, expr)
 #aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 #sympy.pprint(sympy.N(aug))
 #x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
