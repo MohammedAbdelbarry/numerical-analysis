@@ -2,7 +2,8 @@ import sys
 from equations_util import *
 from Equations import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, \
+    QVBoxLayout, QLineEdit, QLabel
 from PyQt5.uic import loadUi
 
 
@@ -101,10 +102,21 @@ class EquationSolverUi(QMainWindow):
         layout = QVBoxLayout()
         view = QTableView()
         model = PandasModel(out.dataframes[0])
+        root_label = QLabel()
+        root_label.setText("Root: " + str(out.roots[0]))
+        error_label = QLabel()
+        error_label.setText("Error: " + str(out.errors[0]))
+        exec_time_label = QLabel()
+        exec_time_label.setText("Execution Time: " + str(out.execution_time))
         if index is not None:
             model = PandasModel(out.dataframes[index])
+            root_label.setText("Root: " + str(out.roots[index]))
+            error_label.setText("Error: " + str(out.errors[index]))
         view.setModel(model)
         layout.addWidget(view)
+        layout.addWidget(root_label)
+        layout.addWidget(error_label)
+        layout.addWidget(exec_time_label)
         new_tab.setLayout(layout)
         return new_tab
 
