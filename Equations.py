@@ -9,11 +9,17 @@ from equations_util import *
 
 
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 2
+    xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     if f(xl) * f(xu) > 0:
         raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
     prev_xr = 0
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+    f = expr_to_lambda(expr)
+    symbol = get_symbol(expr)
+    output = Output()
+    _init_output(output, "bisection", f, expr_to_lambda(diff(expr)))
+    cur_xi = []
+    cur_err_i = []
     for _ in range(0, max_iter):
         yl = f(xl)
         yu = f(xu)
@@ -27,10 +33,17 @@ def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
         else:
             err = 0
         prev_xr = xr
-        output = output.col_join(sympy.Matrix([[xr, err]]))
+        prev_xr = xr
+        cur_xi.append(xr)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(xr)
+    output.errors.append(err)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 
 def bisection(expr, arguments, max_err=1e-5, max_iter=50):
@@ -42,7 +55,7 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
     output = Output()
-    _init_output(output, "Secant", f, expr_to_lambda(diff(expr)))
+    _init_output(output, "bisection", f, expr_to_lambda(diff(expr)))
     cur_xi = []
     cur_err_i = []
     for _ in range(0, max_iter):
@@ -58,10 +71,16 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
         else:
             err = 0
         prev_xr = xr
-        output = output.col_join(sympy.Matrix([[xr, err]]))
+        cur_xi.append(xr)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(xr)
+    output.errors.append(err)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 
 def newton(expr, arguments, max_err=1e-5, max_iter=50):
@@ -72,7 +91,7 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
     f_diff = expr_to_lambda(expr_diff)
     symbol = get_symbol(expr)
     output = Output()
-    _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
+    _init_output(output, "Newton-Raphson", f, f_diff)
     cur_xi = []
     cur_err_i = []
     for _ in range(0, max_iter):
@@ -86,7 +105,7 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     output.roots.append(root)
-    output.roots.append(xi)
+    output.errors.append(err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     output.roots = numpy.array(output.roots).astype(numpy.float64)
     output.errors = numpy.array(output.errors).astype(numpy.float64)
@@ -101,7 +120,7 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
     f_diff = expr_to_lambda(expr_diff)
     symbol = get_symbol(expr)
     output = Output()
-    _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
+    _init_output(output, "Newton-Raphson Mod#1", f, f_diff)
     cur_xi = []
     cur_err_i = []
     for _ in range(0, max_iter):
@@ -115,7 +134,7 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     output.roots.append(root)
-    output.roots.append(xi)
+    output.errors.append(err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     output.roots = numpy.array(output.roots).astype(numpy.float64)
     output.errors = numpy.array(output.errors).astype(numpy.float64)
@@ -146,7 +165,7 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     output.roots.append(root)
-    output.roots.append(xi)
+    output.errors.append(err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     output.roots = numpy.array(output.roots).astype(numpy.float64)
     output.errors = numpy.array(output.errors).astype(numpy.float64)
@@ -174,7 +193,7 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     output.roots.append(root)
-    output.roots.append(xi)
+    output.errors.append(err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     output.roots = numpy.array(output.roots).astype(numpy.float64)
     output.errors = numpy.array(output.errors).astype(numpy.float64)
@@ -198,7 +217,7 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     output.roots.append(root)
-    output.roots.append(xi)
+    output.errors.append(err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
     output.roots = numpy.array(output.roots).astype(numpy.float64)
     output.errors = numpy.array(output.errors).astype(numpy.float64)
@@ -284,17 +303,3 @@ if __name__ == '__main__':
     # f = lambda x: x ** 3 - 2 * x ** 2 - 4 * x + 8
     # g = lambda x: 3 * x ** 2 - 4 * x - 4
     # h = lambda x: 6 * x - 4
-    #output = regula_falsi(f, 1.5, 2.2, 1e-5, 100)
-    #print_table("Regula-Falsi", output[:, 0], f, output[:, 1], symbol)
-    output = bisection(f, 1, 2.2, 1e-5, 100)
-    print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
-    output = newton(f, g, 2.2)
-    print_table("Newton-Raphson", output[:, 0], f, output[:, 1], symbol)
-    # output = fixed_point(f, 0.1)
-    # print_table("Fixed Point", output[:, 0], f, output[:, 1], symbol)
-    output = secant(f, 1.5, 2.2)
-    print_table("Secant", output[:, 0], f, output[:, 1], symbol)
-    output = newton_mod1(f, g, 2.2, 2)
-    print_table("Newton-Raphson Mod#1", output[:, 0], f, output[:, 1], symbol)
-    output = newton_mod2(f, g, h, 2.2)
-    print_table("Newton-Raphson Mod#2", output[:, 0], f, output[:, 1], symbol)
