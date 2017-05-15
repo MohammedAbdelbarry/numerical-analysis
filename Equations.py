@@ -1,11 +1,12 @@
 """Root Finding Methods:
 A collection of methods to find roots of equations.
 """
-import sympy
-from equations_util import *
 import numpy
 from part1_output import Output
 import matplotlib.pyplot
+
+from equations_util import *
+
 
 def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
     if f(xl) * f(xu) > 0:
@@ -71,9 +72,18 @@ def newton(f, f_diff, xi=0, max_err=1e-5, max_iter=50):
             return numpy.array(output).astype(numpy.float64)
     return numpy.array(output).astype(numpy.float64)
 
-def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=50):
-    output = sympy.Matrix([[0, 0]])
-    output.row_del(0)
+
+def newton_mod1(f, f_diff, arguments, max_err=1e-5, max_iter=50):
+    assert len(xi) == 1
+    xi = xi[0]
+    f = expr_to_lambda(expr)
+    expr_diff = diff(expr)
+    f_diff = expr_to_lambda(expr_diff)
+    symbol = get_symbol(expr)
+    output = Output()
+    _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
+    cur_xi = []
+    cur_err_i = []
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_diff = f_diff(xi)
@@ -86,21 +96,18 @@ def newton_mod1(f, f_diff, xi, m, max_err=1e-5, max_iter=50):
     return numpy.array(output).astype(numpy.float64)
 
 
-def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=50):
-    assert len(xi) == 1
-    xi = xi[0]
-    f = output.function = expr_to_lambda(expr)
+def newton_mod2(f, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 1
+    xi = arguments[0]
+    f = expr_to_lambda(expr)
     expr_diff = diff(expr)
-    f_diff = output.boundary_function = expr_to_lambda(expr_diff)
-
+    f_diff = expr_to_lambda(expr_diff)
+    f_diff2 = expr_to_lambda(diff(expr_diff))
     symbol = get_symbol(expr)
     output = Output()
-    output.roots = []
-    output.errors = []
-    output.title = "Fixed-Point"
+    _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
     cur_xi = []
     cur_err_i = []
-
     for _ in range(0, max_iter):
         fxi = f(xi)
         f_diff_xi = f_diff(xi)
@@ -108,23 +115,25 @@ def newton_mod2(f, f_diff, f_diff2, xi, max_err=1e-5, max_iter=50):
         root = xi - f_diff_xi * fxi / (f_diff_xi ** 2 - fxi * f_diff_xi2)
         err = abs((root - xi))
         xi = root
-        output = output.col_join(sympy.Matrix([[root, err]]))
+        cur_xi.append(root)
+        cur_err_i.append(err)
         if err <= max_err:
-            return numpy.array(output).astype(numpy.float64)
-    return numpy.array(output).astype(numpy.float64)
+            break
+    output.roots.append(root)
+    output.roots.append(xi)
+    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.roots = numpy.array(output.roots).astype(numpy.float64)
+    output.errors = numpy.array(output.errors).astype(numpy.float64)
+    return output
 
 
-def secant(f, xi, max_err=1e-5, max_iter=50):
-    assert len(xi) == 2
-    xi, xi_prev = xi[0], xi[1]
+def secant(f, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 2
+    xi, xi_prev = arguments[0], arguments[1]
     f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
     output = Output()
-    output.roots = []
-    output.errors = []
-    output.function = f
-    output.boundary_function = lambda x: x
-    output.title = "Fixed-Point"
+    _init_output(output, "Secant", f, expr_to_lambda(diff(expr)))
     cur_xi = []
     cur_err_i = []
     for _ in range(0, max_iter):
@@ -145,9 +154,9 @@ def secant(f, xi, max_err=1e-5, max_iter=50):
     output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
-def fixed_point(expr, xi, max_err=1e-5, max_iter=50):
-    assert len(xi) == 1
-    xi = xi[0]
+def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 1
+    xi = arguments[0]
     f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
     output = Output()
@@ -169,16 +178,15 @@ def fixed_point(expr, xi, max_err=1e-5, max_iter=50):
     output.errors = numpy.array(output.errors).astype(numpy.float64)
     return output
 
-def birge_vieta(expr, xi, max_err=1e-5, max_iter=50):
-    assert len(xi) == 1
-    xi = xi[0]
+def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
+    assert len(arguments) == 1
+    xi = arguments[0]
     output = Output()
     symbol = get_symbol(expr)
     _init_output(output, "Birge-Vieta", expr_to_lambda(expr),
      expr_to_lambda(diff(expr)))
     poly = sympy.Poly(expr, expr.free_symbols)
     a = poly.all_coeffs()
-
     m = len(a) - 1
     n = m + 1
     i = 1
@@ -213,6 +221,7 @@ def _init_output(output: Output, method_name: str, f, f_bound):
     output.title = method_name
     output.function = f
     output.boundary_function = f_bound
+
 
 def find_coeffs(a, b, c, xi):
     m = len(a) - 1
@@ -255,8 +264,8 @@ if __name__ == '__main__':
     print_table("Bisection", output[:, 0], f, output[:, 1], symbol)
     output = newton(f, g, 2.2)
     print_table("Newton-Raphson", output[:, 0], f, output[:, 1], symbol)
-    #output = fixed_point(f, 0.1)
-    #print_table("Fixed Point", output[:, 0], f, output[:, 1], symbol)
+    # output = fixed_point(f, 0.1)
+    # print_table("Fixed Point", output[:, 0], f, output[:, 1], symbol)
     output = secant(f, 1.5, 2.2)
     print_table("Secant", output[:, 0], f, output[:, 1], symbol)
     output = newton_mod1(f, g, 2.2, 2)

@@ -12,7 +12,7 @@ methods = {'Newton-Raphson': newton, 'Secant': secant, 'Bisection': bisection,
 m = sympy.Matrix([[8, 4, -1, 11], [-2, 3, 1, 4], [2, -1, 6, 7]])
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 # sympy.pprint(sympy.N(gauss_jordan(m), 4))
-print(sympy.solve_linear_system(m, x, y, z))
+# print(sympy.solve_linear_system(m, x, y, z))
 # print(sympy.Matrix(reversed(m.col(m.shape[0]))))
 # print(m.col(m.shape[0]).tolist()[0][0])
 sympy.pprint(sympy.N(gauss_jordan(m), 4))

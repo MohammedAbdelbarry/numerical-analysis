@@ -7,6 +7,8 @@ import functools
 import matplotlib
 import sympy
 
+
+
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
     Transform a list of equations into two matrices A(the coefficients matrix)
@@ -75,13 +77,14 @@ def create_dataframe(x: list, f,
     return df
 
 def string_to_lambda(expr_str: str):
-    expr = sympy.sympify(eqn)
+    expr = sympy.sympify(expr_str)
     free_symbols = expr.free_symbols
     if len(free_symbols) != 1:
         raise ValueError("The Expression Contains More Than One Variable")
     symbol = free_symbols.pop()
     f = sympy.utilities.lambdify(symbol, expr)
     return f
+
 
 def diff(expr: sympy.Expr):
     symbol = get_symbol(expr)
@@ -100,3 +103,10 @@ def get_symbol(expr: sympy.Expr):
 #x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
 #sympy.pprint(x)
 #print(len(err_hist))
+
+if __name__ == '__main__':
+    aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
+    sympy.pprint(sympy.N(aug))
+    # x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
+    # sympy.pprint(x)
+    # print(len(err_hist))
