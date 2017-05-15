@@ -10,8 +10,7 @@ class EquationSolverUi(QMainWindow):
     def __init__(self, *args):
         super(EquationSolverUi, self).__init__(*args)
         loadUi('part1.ui', self)
-        self.method_list = [self.exec_bisection, self.exec_fixed_point, self.exec_newton,
-                            self.exec_newton_mod1, self.exec_newton_mod2, self.exec_regula_falsi, self.exec_secant]
+        self.method_list = [bisection, fixed_point, newton, newton_mod1, newton_mod2, regula_falsi, secant]
         self.solve_btn.clicked.connect(self.solve_eq)
 
     @staticmethod
@@ -24,61 +23,37 @@ class EquationSolverUi(QMainWindow):
         try:
             expr = string_to_expression(self.equ_line.text())
         except:
-            print("Equation is invalid bruh")
+            self.show_error_message("Error: Invalid Equation Format")
             return
         try:
             iter = int(self.iter_line.text())
         except ValueError:
-            print("Max iterations are invalid you lil' piece of shit")
+            self.show_error_message("Error: Invalid Maximum Iterations Format")
             return
         try:
             eps = float(self.eps_line.text())
         except ValueError:
-            print("Epsilon is invalid you ugly shite")
+            self.show_error_message("Error: Invalid Epsilon Format")
             return
         try:
             guesses = self.extract_guesses(self.guess_line.text())
         except:
-            print("Your guesses are incorrect you fucking asshole")
+            self.show_error_message("Error: Invalid 'Guesses' Format")
             return
         try:
             # Clear all tabs and clear table and plots.
             # For each method used, add a new tab with the name of the method and print the table in this tab.
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    method(expr, iter, eps, guesses)
+                    method(expr, guesses, iter, eps)
             else:
-                self.method_list[self.method_select.currentIndex()](expr, iter, eps, guesses)
-        except ValueError as e:
-            print(e)
+                self.method_list[self.method_select.currentIndex()](expr, guesses, iter, eps)
+        except Exception as e:
+            self.show_error_message(str(e))
+            return
 
-    @staticmethod
-    def exec_bisection(expr, iter, eps, guesses):
-        if len(guesses) != 2:
-            raise RuntimeError("There needs to be two guesses")
-        bisection(expr, guesses, eps, iter)
-        print("Bisection Selected Successfully!")
-
-    @staticmethod
-    def exec_fixed_point(expr, iter, eps, guesses):
-        if len(guesses) != 1:
-            raise RuntimeError("There needs to be one guess")
-        fixed_point(expr, guesses, eps, iter)
-
-    def exec_newton(self, f, iter, eps, guesses):
-        pass
-
-    def exec_newton_mod1(self, f, iter, eps, guesses):
-        pass
-
-    def exec_newton_mod2(self, f, iter, eps, guesses):
-        pass
-
-    def exec_regula_falsi(self, f, iter, eps, guesses):
-        pass
-
-    def exec_secant(self, f, iter, eps, guesses):
-        pass
+    def show_error_message(self, msg):
+        self.error_msg.setText(msg)
 
 
 if __name__ == '__main__':
