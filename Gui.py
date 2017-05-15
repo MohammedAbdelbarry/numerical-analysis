@@ -1,5 +1,8 @@
 import sys
-from equations_util import *
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from pandas import DataFrame
 from Equations import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout
@@ -44,6 +47,21 @@ class EquationSolverUi(QMainWindow):
         self.method_list = [bisection, fixed_point, newton, newton_mod1,
                             newton_mod2, regula_falsi, secant]
         self.solve_btn.clicked.connect(self.solve_eq)
+        self.func_plot = self.error_plot = None
+        self.figs = [(plt.Figure(), self.func_plot, self.func_tab), (plt.Figure(), self.error_plot, self.error_tab)]
+        self.render_figs()
+
+    def render_figs(self):
+        for (fig, plot, tab) in self.figs:
+            plot = fig.add_subplot(111)
+            plot.grid(True)
+            canvas = FigureCanvas(fig)
+            layout = QVBoxLayout()
+            layout.addWidget(canvas)
+            toolbar = NavigationToolbar(canvas, tab, coordinates=True)
+            layout.addWidget(toolbar)
+        self.func_plot = self.figs[0][1]
+        self.error_plot = self.figs[1][1]
 
     @staticmethod
     def extract_guesses(guesses):
@@ -77,10 +95,11 @@ class EquationSolverUi(QMainWindow):
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
                     out = method(expr, guesses, eps, iter)
-                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+                    self.tabWidget_2.addTab(self._setup_out_tab(out), out.title)
             else:
                 out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
-                self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+                self.tabWidget.addTab(self._setup_plot_tab(out), "Plot")
+                self.tabWidget_2.addTab(self._setup_out_tab(out), out.title)
         except Exception as e:
             self.show_error_msg(str(e))
 
@@ -88,13 +107,23 @@ class EquationSolverUi(QMainWindow):
         self.error_msg.setText(msg)
 
     @staticmethod
-    def _setup_tab(out: Output):
+    def _setup_out_tab(out: Output):
         new_tab = QWidget()
         layout = QVBoxLayout()
         view = QTableView()
         model = PandasModel(out.dataframes[0])
         view.setModel(model)
         layout.addWidget(view)
+        new_tab.setLayout(layout)
+        return new_tab
+
+    def _setup_plot_tab(self, out: Output):
+        new_tab = QWidget()
+        layout = QVBoxLayout()
+        canvas = FigureCanvas(figure=self.figure)
+        toolbar = NavigationToolbar(canvas, self)
+        layout.addWidget(toolbar)
+        layout.addWidget(canvas)
         new_tab.setLayout(layout)
         return new_tab
 

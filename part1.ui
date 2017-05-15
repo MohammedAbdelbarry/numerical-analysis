@@ -20,14 +20,14 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="func_tab">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Function</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="error_tab">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Error</string>
        </attribute>
       </widget>
      </widget>
