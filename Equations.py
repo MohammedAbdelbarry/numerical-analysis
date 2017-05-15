@@ -9,7 +9,8 @@ from equations_util import *
 
 
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 2
+    if len(arguments) != 2:
+        raise ValueError("Error! Invalid number of arguments")
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     f = expr_to_lambda(expr)
     if f(xl) * f(xu) > 0:
@@ -48,7 +49,8 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def bisection(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 2
+    if len(arguments) != 2:
+        raise ValueError("Error! Invalid number of arguments")
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     f = expr_to_lambda(expr)
     if f(xl) * f(xu) > 0:
@@ -86,7 +88,8 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def newton(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 1
+    if len(arguments) != 1:
+        raise ValueError("Error! Invalid number of arguments")
     xi = arguments[0]
     f = expr_to_lambda(expr)
     expr_diff = diff(expr)
@@ -116,7 +119,8 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 2
+    if len(arguments) != 2:
+        raise ValueError("Error! Invalid number of arguments")
     xi, m = arguments[0], arguments[1]
     f = expr_to_lambda(expr)
     expr_diff = diff(expr)
@@ -146,7 +150,8 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 1
+    if len(arguments) != 1:
+        raise ValueError("Error! Invalid number of arguments")
     xi = arguments[0]
     f = expr_to_lambda(expr)
     expr_diff = diff(expr)
@@ -178,7 +183,8 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def secant(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 2
+    if len(arguments) != 2:
+        raise ValueError("Error! Invalid number of arguments")
     xi, xi_prev = arguments[0], arguments[1]
     f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
@@ -207,7 +213,8 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 1
+    if len(arguments) != 1:
+        raise ValueError("Error! Invalid number of arguments")
     xi = arguments[0]
     f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
@@ -233,7 +240,8 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
-    assert len(arguments) == 1
+    if len(arguments) != 1:
+        raise ValueError("Error! Invalid number of arguments")
     xi = arguments[0]
     output = Output()
     symbol = get_symbol(expr)
