@@ -5,7 +5,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from pandas import DataFrame
 from Equations import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, \
+    QVBoxLayout
 from PyQt5.uic import loadUi
 
 
@@ -98,13 +99,17 @@ class EquationSolverUi(QMainWindow):
                     self.tabWidget_2.addTab(self._setup_out_tab(out), out.title)
             else:
                 out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
-                self.tabWidget.addTab(self._setup_plot_tab(out), "Plot")
                 self.tabWidget_2.addTab(self._setup_out_tab(out), out.title)
+                self.update_plots(out)
         except Exception as e:
             self.show_error_msg(str(e))
 
     def show_error_msg(self, msg):
         self.error_msg.setText(msg)
+
+    def update_plots(self, out):
+        out.dataframes[0].plot(ax=self.func_plot)
+    pass
 
     @staticmethod
     def _setup_out_tab(out: Output):
@@ -114,16 +119,6 @@ class EquationSolverUi(QMainWindow):
         model = PandasModel(out.dataframes[0])
         view.setModel(model)
         layout.addWidget(view)
-        new_tab.setLayout(layout)
-        return new_tab
-
-    def _setup_plot_tab(self, out: Output):
-        new_tab = QWidget()
-        layout = QVBoxLayout()
-        canvas = FigureCanvas(figure=self.figure)
-        toolbar = NavigationToolbar(canvas, self)
-        layout.addWidget(toolbar)
-        layout.addWidget(canvas)
         new_tab.setLayout(layout)
         return new_tab
 
