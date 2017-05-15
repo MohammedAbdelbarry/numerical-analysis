@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1108</width>
-    <height>755</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -148,6 +148,11 @@
             <string>Secant</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Birge Vieta</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item row="3" column="0">
@@ -187,28 +192,8 @@
       <item>
        <widget class="QTabWidget" name="tabWidget_2">
         <property name="currentIndex">
-         <number>0</number>
+         <number>-1</number>
         </property>
-        <widget class="QWidget" name="tab_3">
-         <attribute name="title">
-          <string>Tab 1</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QTableWidget" name="tableWidget"/>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_4">
-         <attribute name="title">
-          <string>Tab 2</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_2"/>
-          </item>
-         </layout>
-        </widget>
        </widget>
       </item>
       <item>

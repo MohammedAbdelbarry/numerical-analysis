@@ -2,20 +2,52 @@ import sys
 from equations_util import *
 from Equations import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView
 from PyQt5.uic import loadUi
+
+
+class PandasModel(QtCore.QAbstractTableModel):
+    """
+    Class to populate a table view with a pandas dataframe
+    """
+
+    def __init__(self, data, parent=None):
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return self._data.shape[0]
+
+    def columnCount(self, parent=None):
+        return self._data.shape[1] + 1
+
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        if index.isValid():
+            if role == QtCore.Qt.DisplayRole:
+                if index.column() == 0:
+                    return index.row() + 1
+                return str(self._data.iloc[index.row(), index.column() - 1])
+        return None
+
+    def headerData(self, col, orientation, role):
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            if col == 0:
+                return 'i'
+            return self._data.columns[col - 1]
+        return None
 
 
 class EquationSolverUi(QMainWindow):
     def __init__(self, *args):
         super(EquationSolverUi, self).__init__(*args)
         loadUi('part1.ui', self)
-        self.method_list = [bisection, fixed_point, newton, newton_mod1, newton_mod2, regula_falsi, secant]
+        self.method_list = [bisection, fixed_point, newton, newton_mod1,
+                            newton_mod2, regula_falsi, secant]
         self.solve_btn.clicked.connect(self.solve_eq)
 
     @staticmethod
     def extract_guesses(guesses):
-        return [float(x) for x in str(guesses).strip().split(',')]
+        return [float(x.strip()) for x in str(guesses).strip().split(',')]
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
@@ -23,37 +55,49 @@ class EquationSolverUi(QMainWindow):
         try:
             expr = string_to_expression(self.equ_line.text())
         except:
-            self.show_error_message("Error: Invalid Equation Format")
+            self.show_error_msg("Error: Invalid Equation Format")
             return
         try:
             iter = int(self.iter_line.text())
         except ValueError:
-            self.show_error_message("Error: Invalid Maximum Iterations Format")
+            self.show_error_msg("Error: Invalid Maximum Iterations Format")
             return
         try:
             eps = float(self.eps_line.text())
         except ValueError:
-            self.show_error_message("Error: Invalid Epsilon Format")
+            self.show_error_msg("Error: Invalid Epsilon Format")
             return
         try:
             guesses = self.extract_guesses(self.guess_line.text())
         except:
-            self.show_error_message("Error: Invalid 'Guesses' Format")
+            self.show_error_msg("Error: Invalid 'Guesses' Format")
             return
         try:
             # Clear all tabs and clear table and plots.
-            # For each method used, add a new tab with the name of the method and print the table in this tab.
+            self.tabWidget_2.clear()
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    method(expr, guesses, iter, eps)
+                    out = method(expr, guesses, iter, eps)
+                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
-                self.method_list[self.method_select.currentIndex()](expr, guesses, iter, eps)
-        except Exception as e:
-            self.show_error_message(str(e))
-            return
+                out = self.method_list[self.method_select.currentIndex()](expr, guesses, iter, eps)
+                self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+        except ValueError as e:
+            self.show_error_msg(str(e))
 
-    def show_error_message(self, msg):
+    def show_error_msg(self, msg):
         self.error_msg.setText(msg)
+
+    @staticmethod
+    def _setup_tab(out: Output):
+        new_tab = QWidget()
+        layout = QFormLayout()
+        view = QTableView()
+        model = PandasModel(out.dataframes[0])
+        view.setModel(model)
+        layout.addWidget(view)
+        new_tab.setLayout(layout)
+        return new_tab
 
 
 if __name__ == '__main__':
