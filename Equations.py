@@ -4,7 +4,7 @@ A collection of methods to find roots of equations.
 import numpy
 from part1_output import Output
 import matplotlib.pyplot
-
+import timeit
 from equations_util import *
 
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
@@ -19,6 +19,7 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "bisection", f, expr_to_lambda(diff(expr)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         yl = f(xl)
         yu = f(xu)
@@ -37,6 +38,8 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, xr)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -55,6 +58,7 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "bisection", f, expr_to_lambda(diff(expr)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         yl = f(xl)
         yu = f(xu)
@@ -72,6 +76,8 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, xr)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -89,6 +95,7 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Newton-Raphson", f, f_diff)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_diff = f_diff(xi)
@@ -99,6 +106,8 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -116,6 +125,7 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Newton-Raphson Mod#1", f, f_diff)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_diff = f_diff(xi)
@@ -126,6 +136,8 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -144,6 +156,7 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
         f_diff_xi = f_diff(xi)
@@ -155,6 +168,8 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -170,6 +185,7 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Secant", f, expr_to_lambda(diff(expr)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
         fxi_prev = f(xi_prev)
@@ -181,6 +197,8 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -195,6 +213,7 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Fixed-Point", f, lambda x: x)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    begin = timeit.default_timer()
     for i in range(0, max_iter):
         root = xi - f(xi)
         err = abs((root - xi))
@@ -203,6 +222,8 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
@@ -220,6 +241,7 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
     m = len(a) - 1
     n = m + 1
     i = 1
+    begin = timeit.default_timer()
     while m > 0:
         cur_xi = numpy.empty(0, dtype=numpy.float64)
         cur_err_i = numpy.empty(0, dtype=numpy.float64)
@@ -241,6 +263,8 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
         i += 1
         output.roots = numpy.append(output.roots, xi)
         output.errors = numpy.append(output.errors, err)
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
     return output
 
 def _init_output(output: Output, method_name: str, f, f_bound):
@@ -267,24 +291,31 @@ if __name__ == '__main__':
     # 5) Modified Newton(With Known Multiplicity)
     # 6) Modified Newton(With Unknown Multiplicity)""")
     out = birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     out = newton(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     out = newton_mod1(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, 2])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     out = newton_mod2(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     out = secant(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     out = bisection(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     out = regula_falsi(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
     #print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
