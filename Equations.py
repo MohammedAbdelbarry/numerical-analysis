@@ -8,7 +8,7 @@ import matplotlib.pyplot
 from equations_util import *
 
 
-def regula_falsi(f, xl, xu, max_err=1e-5, max_iter=50):
+def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     assert len(arguments) == 2
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     if f(xl) * f(xu) > 0:
@@ -283,7 +283,7 @@ if __name__ == '__main__':
     # 4) Regula-Falsi Method
     # 5) Modified Newton(With Known Multiplicity)
     # 6) Modified Newton(With Unknown Multiplicity)""")
-    out = birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), -3)
+    out = birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
     for df in out.dataframes:
         print(df)
     #print(birge_vieta(sympy.sympify("x ** 4 - 9 * x ** 3 - 2 * x ** 2 + 120 * x - 130"), -3))
