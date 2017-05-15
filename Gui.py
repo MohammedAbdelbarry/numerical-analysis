@@ -34,7 +34,7 @@ class PandasModel(QtCore.QAbstractTableModel):
                 return 'i'
             return self._data.columns[col - 1]
         return None
-    
+
 
 class EquationSolverUi(QMainWindow):
     def __init__(self, *args):
@@ -42,7 +42,7 @@ class EquationSolverUi(QMainWindow):
         loadUi('part1.ui', self)
         self.method_list = [self.exec_bisection, self.exec_fixed_point, self.exec_newton,
                             self.exec_newton_mod1, self.exec_newton_mod2, self.exec_regula_falsi,
-                            self.exec_secant]
+                            self.exec_secant, self.exec_birge_vieta]
         self.solve_btn.clicked.connect(self.solve_eq)
 
     @staticmethod
@@ -123,6 +123,11 @@ class EquationSolverUi(QMainWindow):
     @staticmethod
     def exec_secant(expr, iter, eps, guesses):
         out = secant(expr, guesses, eps, iter)
+        return _setup_tab(out), out.title
+
+    @staticmethod
+    def exec_birge_vieta(expr, iter, eps, guesses):
+        out = birge_vieta(expr, iter, eps, guesses)
         return _setup_tab(out), out.title
 
 
