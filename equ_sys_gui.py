@@ -48,9 +48,7 @@ class LinearEquationsSolver(QMainWindow):
 
     @staticmethod
     def extract_equations(equations):
-        eqs = equations.splitlines()
-        # validate
-        return eqs
+        return [x.strip() for x in str(equations).strip().splitlines()]
 
     @QtCore.pyqtSlot()
     def solve_linear_eqs(self):
