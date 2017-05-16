@@ -279,7 +279,7 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
     return output
 
 
-def illinois(expr, arguments, max_error=1e-5, max_iter=50):
+def illinois(expr, arguments, max_err=1e-5, max_iter=50):
     if len(arguments) != 2:
         raise ValueError("Error! Invalid number of arguments")
     start, end = arguments[0], arguments[1]
@@ -324,7 +324,7 @@ def illinois(expr, arguments, max_error=1e-5, max_iter=50):
             prev_xi = xi
             cur_xi = numpy.append(cur_xi, xi)
             cur_err_i = numpy.append(cur_err_i, err)
-            if err <= max_error:
+            if err <= max_err:
                 break
 
         output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol, counter))
@@ -364,31 +364,32 @@ if __name__ == '__main__':
     print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
-    out = newton(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
-    print(out.title + ":", out.execution_time)
-    for df in out.dataframes:
-        print(df)
-    out = newton_mod1(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, 2])
-    print(out.title + ":", out.execution_time)
-    for df in out.dataframes:
-        print(df)
-    out = newton_mod2(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
-    print(out.title + ":", out.execution_time)
-    for df in out.dataframes:
-        print(df)
-    out = secant(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
-    print(out.title + ":", out.execution_time)
-    for df in out.dataframes:
-        print(df)
-    out = bisection(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
-    print(out.title + ":", out.execution_time)
-    for df in out.dataframes:
-        print(df)
-    out = regula_falsi(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
-    print(out.title + ":", out.execution_time)
-    for df in out.dataframes:
-        print(df)
-    out = illinois(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-4.0001, 10])
+    # out = newton(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    # print(out.title + ":", out.execution_time)
+    # for df in out.dataframes:
+    #     print(df)
+    # out = newton_mod1(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, 2])
+    # print(out.title + ":", out.execution_time)
+    # for df in out.dataframes:
+    #     print(df)
+    # out = newton_mod2(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    # print(out.title + ":", out.execution_time)
+    # for df in out.dataframes:
+    #     print(df)
+    # out = secant(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    # print(out.title + ":", out.execution_time)
+    # for df in out.dataframes:
+    #     print(df)
+    # out = bisection(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    # print(out.title + ":", out.execution_time)
+    # for df in out.dataframes:
+    #     print(df)
+    # out = regula_falsi(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3, -5])
+    # print(out.title + ":", out.execution_time)
+    # for df in out.dataframes:
+    #     print(df)
+    out = illinois(sympy.sympify("(x - 0) * ( x - 1) * (x - 2) * ( x - 3) * (x - 4) * (x - 5) * (x - 6) * (x - 7) * ("
+                                 "x - 8) * (x - 9)"), [-1.0001, 10])
     print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)

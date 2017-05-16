@@ -46,7 +46,7 @@ class EquationSolverUi(QMainWindow):
         super(EquationSolverUi, self).__init__(*args)
         loadUi('part1.ui', self)
         self.method_list = [bisection, fixed_point, newton, newton_mod1,
-                            newton_mod2, regula_falsi, secant, birge_vieta]
+                            newton_mod2, regula_falsi, secant, birge_vieta, illinois]
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
         self.figs = [[plt.figure(0), self.func_plot, self.func_tab], [plt.figure(1), self.error_plot, self.error_tab]]
