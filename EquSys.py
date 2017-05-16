@@ -2,6 +2,7 @@ import sympy
 import numpy
 from part1_output import Output
 from equations_util import create_dataframe_part2
+import timeit
 
 def _eliminate(system: sympy.Matrix, i, j):
     """
@@ -169,6 +170,7 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
 
     n = A.shape[0]
     output = Output()
+    output.title = "Jacobi"
     if b is None:
         A, b = [A[:, :-1], A[:, -1]]
     if x is None:
@@ -177,6 +179,7 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
     x_prev = x[:, :]
     err_hist = []
     x_hist = sympy.Matrix(x)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         x = D.inv() * (b - (A - D) * x)
         x_hist = x_hist.row_join(x)
@@ -186,6 +189,10 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
         x_prev = x[:, :]
         if err < max_err:
             break
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    output.roots = numpy.array(x).astype(numpy.float64)[0]
+    output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe_part2(x_hist, err, symbols))
     return numpy.array(x).astype(numpy.float64), output
 
