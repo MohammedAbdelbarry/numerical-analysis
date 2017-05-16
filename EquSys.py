@@ -71,10 +71,6 @@ def _get_max_elem(system, i):
     return max_ind
 
 
-def _init_output(output : Output, method_title : str):
-    output.title = method_title
-
-
 def gauss(system: sympy.Matrix, symbol_list: list):
     """
     Performs gauss elimination with partial pivoting on a system of
@@ -84,7 +80,7 @@ def gauss(system: sympy.Matrix, symbol_list: list):
     :return: a [n, 1] matrix containing result.
     """
     output = Output()
-    _init_output(output, "Gaussian-Elimination")
+    output.title = "Gaussian-Elimination"
     n = system.shape[0]
     begin = timeit.default_timer()
     # iterate over columns
@@ -103,17 +99,19 @@ def gauss(system: sympy.Matrix, symbol_list: list):
     return output
 
 
-def gauss_jordan(system: sympy.Matrix):
+def gauss_jordan(system: sympy.Matrix, symbol_list):
     """
     Performs gauss jordan elimination with partial pivoting on a system of
     linear equations.
     :param system: system of linear equations.
+    :param symbol_list: list of symbols used in the equations.
     :return: a [n, 1] matrix (vector) containing result.
     """
     system = system.as_mutable()
     n = system.shape[0]
     output = Output()
-    _init_output(output, "Gauss-Jordan")
+    output.title = "Gauss Jordan"
+    begin = timeit.default_timer()
     # iterate over rows
     for i in range(0, n):
         # find maximum magnitude and index in this column
@@ -128,8 +126,11 @@ def gauss_jordan(system: sympy.Matrix):
         # forward elimination, iterate over previous rows and eliminate
         for j in range(i - 1, -1, -1):
             _eliminate(system, i, j)
-    # return last column reversed
-    return sympy.Matrix(system.col(system.shape[0]))
+    # return last column
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    output.dataframes.append(create_equ_sys_df(symbol_list, sympy.Matrix(system.col(system.shape[0]))))
+    return output
 
 
 def _decompose(a, indexMap):
@@ -149,18 +150,22 @@ def _decompose(a, indexMap):
     return a, indexMap
 
 
-def lu_decomp(system: sympy.Matrix):
+def lu_decomp(system: sympy.Matrix, symbol_list):
     # TODO: Check for sigularity.
     system = system.as_mutable()
     output = Output()
-    _init_output(output, "LU Decomposition")
+    output.title = "LU Decomposition"
+    begin = timeit.default_timer()
     n = system.shape[0]
     a = system[:, :n]
     b = system[:, n]
     indexMap = numpy.array(range(n), dtype=numpy.int)
     a, indexMap = _decompose(a, indexMap)
     y = _forward_sub(a, b, indexMap)
-    return _back_sub(a.row_join(y), indexMap)
+    output.dataframes.append(create_equ_sys_df(symbol_list, _back_sub(a.row_join(y), indexMap)))
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    return  output
 
 
 def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
