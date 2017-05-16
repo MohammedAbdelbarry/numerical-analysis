@@ -31,14 +31,14 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="equ_label">
         <property name="text">
-         <string>Eqiuations</string>
+         <string>Equations</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="max_iter_label">
         <property name="text">
          <string>Max Iterations</string>
         </property>
@@ -73,7 +73,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="eps_label">
           <property name="text">
            <string>Epsilon</string>
           </property>
@@ -108,7 +108,7 @@
        </layout>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="methods_label">
         <property name="text">
          <string>Methods</string>
         </property>
@@ -164,6 +164,13 @@
       </property>
       <property name="text">
        <string>Solve</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="error_msg">
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </item>

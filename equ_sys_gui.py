@@ -46,14 +46,16 @@ class LinearEquationsSolver(QMainWindow):
 
     @staticmethod
     def extract_equations(equations):
-        pass
+        eqs = equations.splitlines()
+        # validate
+        return eqs
 
     @QtCore.pyqtSlot()
     def solve_linear_eqs(self):
         self.clear()
         eqs = iter = eps = None
         try:
-            eqs = self.extract_equations(self.equations_text.text())
+            eqs = self.extract_equations(self.equations_text.toPlainText())
         except:
             self.show_error_msg("Error: Invalid Equations Format")
             return
@@ -68,12 +70,13 @@ class LinearEquationsSolver(QMainWindow):
             self.show_error_msg("Error: Invalid Epsilon Format")
             return
         try:
+            aug_mat, symb_list = equations_to_aug_matrix(eqs)
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    out = method(equations_to_aug_matrix(eqs))
+                    out = method(aug_mat, symb_list)
                     self.table_tab_widget.addTab(self._setup_tab(out), out.title)
             else:
-                out = self.method_list[self.method_select.currentIndex()](equations_to_aug_matrix(eqs))
+                out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list)
                 self.table_tab_widget.addTab(self._setup_tab(out), out.title)
         except Exception as e:
             self.show_error_msg(str(e))

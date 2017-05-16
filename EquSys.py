@@ -3,7 +3,7 @@ import timeit
 import sympy
 import numpy
 
-from equations_util import create_equ_sys_df
+import equations_util
 from part1_output import Output
 
 
@@ -95,7 +95,7 @@ def gauss(system: sympy.Matrix, symbol_list: list):
     # perform back substitution.
     end = timeit.default_timer()
     output.execution_time = abs(end - begin)
-    output.dataframes.append(create_equ_sys_df(symbol_list, _back_sub(system)))
+    output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, _back_sub(system)))
     return output
 
 
@@ -129,7 +129,7 @@ def gauss_jordan(system: sympy.Matrix, symbol_list):
     # return last column
     end = timeit.default_timer()
     output.execution_time = abs(end - begin)
-    output.dataframes.append(create_equ_sys_df(symbol_list, sympy.Matrix(system.col(system.shape[0]))))
+    output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, sympy.Matrix(system.col(system.shape[0]))))
     return output
 
 
@@ -162,7 +162,7 @@ def lu_decomp(system: sympy.Matrix, symbol_list):
     indexMap = numpy.array(range(n), dtype=numpy.int)
     a, indexMap = _decompose(a, indexMap)
     y = _forward_sub(a, b, indexMap)
-    output.dataframes.append(create_equ_sys_df(symbol_list, _back_sub(a.row_join(y), indexMap)))
+    output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, _back_sub(a.row_join(y), indexMap)))
     end = timeit.default_timer()
     output.execution_time = abs(end - begin)
     return  output

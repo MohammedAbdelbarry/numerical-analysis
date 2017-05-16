@@ -78,11 +78,11 @@ def create_dataframe(x: list, f,
 
 
 def create_equ_sys_df(symbol_list, value_list):
-    symbols = "Symbols"
+    vars = "Variables"
     values = "Values"
-    df = pandas.DataFrame({symbols: symbol_list,
-                           values: value_list})
-    df = df[[symbols, values]]
+    df = pandas.DataFrame({vars: symbol_list,
+                           values: list(value_list)})
+    df = df[[vars, values]]
     return df
 
 
