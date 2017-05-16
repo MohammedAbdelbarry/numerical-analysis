@@ -8,7 +8,6 @@ import matplotlib
 import sympy
 
 
-
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
     Transform a list of equations into two matrices A(the coefficients matrix)
@@ -57,11 +56,12 @@ def equations_to_aug_matrix(equations: list):
     A, b, symbol_list = equations_to_matrices(equations)
     return A.row_join(b), symbol_list
 
+
 def create_dataframe(x: list, f,
- err: list, symbol: sympy.Symbol, i=None):
+                     err: list, symbol: sympy.Symbol, i=None):
     sym_str = str(symbol)
     err_str = "Error"
-    if i  != None:
+    if i != None:
         sym_str += str(i)
         err_str += str(i)
     df = pandas.DataFrame({sym_str: x,
@@ -71,10 +71,20 @@ def create_dataframe(x: list, f,
     ### WE COULD ADD AN OPTION TO CHOOSE THE FILE NAME AND EXTENSION
     ### available formats: HTML, CSV, PICKLE (Pickle Serializer)
     ### LATEX, EXCEL, SQL, JSON, HDF,FEATHER and GBQ (Google BigQuery)
-    #df.to_csv(path_or_buf=method_name + '.csv')
-    #with open(method_name + '.html', 'w') as html_file:
+    # df.to_csv(path_or_buf=method_name + '.csv')
+    # with open(method_name + '.html', 'w') as html_file:
     #    html_file.write(df.to_html())
     return df
+
+
+def create_equ_sys_df(symbol_list, value_list):
+    symbols = "Symbols"
+    values = "Values"
+    df = pandas.DataFrame({symbols: symbol_list,
+                           values: value_list})
+    df = df[[symbols, values]]
+    return df
+
 
 def string_to_lambda(expr_str: str):
     expr = sympy.sympify(expr_str)
@@ -85,6 +95,7 @@ def string_to_lambda(expr_str: str):
     f = sympy.utilities.lambdify(symbol, expr)
     return f
 
+
 def string_to_expression(expr_str: str):
     expr = sympy.sympify(expr_str)
     free_symbols = expr.free_symbols
@@ -92,9 +103,11 @@ def string_to_expression(expr_str: str):
         raise ValueError("The Expression Contains More Than One Variable")
     return expr
 
+
 def diff(expr: sympy.Expr):
     symbol = get_symbol(expr)
     return sympy.diff(expr, symbol)
+
 
 def expr_to_lambda(expr: sympy.Expr):
     symbol = get_symbol(expr)
@@ -103,16 +116,19 @@ def expr_to_lambda(expr: sympy.Expr):
         return lambda x: val
     return sympy.lambdify(symbol, expr)
 
+
 def get_symbol(expr: sympy.Expr):
     free_symbols = expr.free_symbols.copy()
     if len(free_symbols) == 0:
         return None
     return free_symbols.pop()
-#aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
-#sympy.pprint(sympy.N(aug))
-#x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
-#sympy.pprint(x)
-#print(len(err_hist))
+
+
+# aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
+# sympy.pprint(sympy.N(aug))
+# x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
+# sympy.pprint(x)
+# print(len(err_hist))
 
 if __name__ == '__main__':
     aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
