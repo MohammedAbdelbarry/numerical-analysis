@@ -130,7 +130,7 @@ class EquationSolverUi(QMainWindow):
         self.func_plot.grid(True)
         self.func_plot.plot(x, [out.function(z) for z in x], 'r', label="f")
         self.func_plot.plot(x, [out.boundary_function(z) for z in x], 'g', label="g")
-        plt.legend("")
+        self.func_plot.legend(["Function", "Boundary Function"])
         self.func_canvas.draw()
 
     @staticmethod
