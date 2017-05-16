@@ -7,6 +7,7 @@ import matplotlib
 import sympy
 import numpy
 
+
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
     Transform a list of equations into two matrices A(the coefficients matrix)
@@ -130,21 +131,22 @@ def get_symbol(expr: sympy.Expr):
         return None
     return free_symbols.pop()
 
+
 def get_symbols(expr: sympy.Expr):
     return sorted(list(expr.free_symbols))
 
 
-#aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
-#sympy.pprint(sympy.N(aug))
-#x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
-#sympy.pprint(x)
-#print(len(err_hist))
+# aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
+# sympy.pprint(sympy.N(aug))
+# x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
+# sympy.pprint(x)
+# print(len(err_hist))
 
 
 if __name__ == '__main__':
     aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
     sympy.pprint(sympy.N(aug))
-    print(create_dataframe_part2(sympy.Matrix([[1,1]]), [3], sympy.symbols('x y')))
+    print(create_dataframe_part2(sympy.Matrix([[1, 1]]), [3], sympy.symbols('x y')))
     # x, x_hist, err_hist = jacobi(aug, x=sympy.Matrix([[1], [0], [1]]))
     # sympy.pprint(x)
     # print(len(err_hist))

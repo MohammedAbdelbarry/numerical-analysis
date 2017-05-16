@@ -134,12 +134,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Gauss-Seidel</string>
+          <string>LU Decomposition</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>LU Decomposition</string>
+          <string>Gauss-Seidel</string>
          </property>
         </item>
         <item>
@@ -169,6 +169,15 @@
     </item>
     <item>
      <widget class="QLabel" name="error_msg">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: red</string>
+      </property>
       <property name="text">
        <string/>
       </property>

@@ -1,9 +1,11 @@
 import sys
-from Equations import *
+from EquSys import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
                              QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel)
 from PyQt5.uic import loadUi
+
+from equations_util import equations_to_aug_matrix
 
 
 class PandasModel(QtCore.QAbstractTableModel):
@@ -41,7 +43,7 @@ class LinearEquationsSolver(QMainWindow):
     def __init__(self, *args):
         super(LinearEquationsSolver, self).__init__(*args)
         loadUi('part2.ui', self)
-        self.method_list = [gauss, gauss_jordan, gauss_seidel, lu_decomp, jacobi]
+        self.method_list = [gauss, gauss_jordan, lu_decomp, gauss_seidel, jacobi]
         self.solve_btn.clicked.connect(self.solve_linear_eqs)
 
     @staticmethod
@@ -72,11 +74,17 @@ class LinearEquationsSolver(QMainWindow):
         try:
             aug_mat, symb_list = equations_to_aug_matrix(eqs)
             if self.method_select.currentText() == "All methods":
-                for method in self.method_list:
-                    out = method(aug_mat, symb_list)
+                for i in range(len(self.method_list)):
+                    if i < 3:
+                        out = self.method_list[i](aug_mat, symb_list)
+                    else:
+                        out = self.method_list[i](aug_mat, symb_list, iter, eps)
                     self.table_tab_widget.addTab(self._setup_tab(out), out.title)
             else:
-                out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list)
+                if self.method_select.currentIndex() < 3:
+                    out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list)
+                else:
+                    out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list, iter, eps)
                 self.table_tab_widget.addTab(self._setup_tab(out), out.title)
         except Exception as e:
             self.show_error_msg(str(e))
