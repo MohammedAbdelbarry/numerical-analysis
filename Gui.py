@@ -49,20 +49,21 @@ class EquationSolverUi(QMainWindow):
                             newton_mod2, regula_falsi, secant, birge_vieta]
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
-        self.figs = [(plt.Figure(), self.func_plot, self.func_tab), (plt.Figure(), self.error_plot, self.error_tab)]
         self.render_figs()
 
     def render_figs(self):
-        for (fig, plot, tab) in self.figs:
-            plot = fig.add_subplot(111)
-            plot.grid(True)
-            canvas = FigureCanvas(fig)
+        figs = [[plt.Figure(), self.func_plot, self.func_tab],
+                [plt.Figure(), self.error_plot, self.error_tab]]
+        for lst in figs:
+            lst[1] = lst[0].add_subplot(111)
+            lst[1].grid(True)
+            canvas = FigureCanvas(lst[0])
             layout = QVBoxLayout()
             layout.addWidget(canvas)
-            toolbar = NavigationToolbar(canvas, tab, coordinates=True)
+            toolbar = NavigationToolbar(canvas, lst[2], coordinates=True)
             layout.addWidget(toolbar)
-        self.func_plot = self.figs[0][1]
-        self.error_plot = self.figs[1][1]
+        self.func_plot = figs[0][1]
+        self.error_plot = figs[1][1]
 
     @staticmethod
     def extract_guesses(guesses):
@@ -116,8 +117,8 @@ class EquationSolverUi(QMainWindow):
         self.error_msg.setText(msg)
 
     def update_plots(self, out):
-        out.dataframes[0].plot(ax=self.func_plot)
-    pass
+        # out.dataframes[0].plot(ax=self.func_plot)
+        pass
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
