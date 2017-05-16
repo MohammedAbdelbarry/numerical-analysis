@@ -1,12 +1,11 @@
 """Equation Utilities:
 A module containing some equation parsing methods.
 """
-from EquSys import *
 import pandas
 import functools
 import matplotlib
 import sympy
-
+import numpy
 
 def equations_to_matrices(equations: list):
     """Equations to Matrix:
@@ -88,7 +87,7 @@ def create_equ_sys_df(symbol_list, value_list):
 
 def create_dataframe_part2(x: sympy.Matrix, err: list, symbol: sympy.Symbol):
     out = dict()
-    for i in range(x.shape[1]):
+    for i in range(x.shape[0]):
         out[str(symbol[i])] = numpy.array(x[:, i]).astype(numpy.float64)[0]
     out["Error"] = err
     return pandas.DataFrame(out)
