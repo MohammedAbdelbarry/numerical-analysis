@@ -154,7 +154,6 @@ def _decompose(a, indexMap):
 
 
 def lu_decomp(system: sympy.Matrix, symbol_list):
-    # TODO: Check for sigularity.
     system = system.as_mutable()
     output = Output()
     output.title = "LU Decomposition"
@@ -168,7 +167,7 @@ def lu_decomp(system: sympy.Matrix, symbol_list):
     output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, _back_sub(a.row_join(y), indexMap)))
     end = timeit.default_timer()
     output.execution_time = abs(end - begin)
-    return  output
+    return output
 
 
 def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
