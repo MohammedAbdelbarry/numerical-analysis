@@ -59,11 +59,12 @@ class EquationSolverUi(QMainWindow):
             self.figs[i][1] = fig.add_subplot(111)
             self.figs[i][1].grid(True)
             canvas = FigureCanvas(fig)
-            self.figs[i][1].plot(range(1, 10), range(2, 20, 2))
             layout = QVBoxLayout()
             layout.addWidget(canvas)
             toolbar = NavigationToolbar(canvas, tab, coordinates=True)
             layout.addWidget(toolbar)
+            tab.setLayout(layout)
+            canvas.draw()
         self.func_plot = self.figs[0][1]
         self.error_plot = self.figs[1][1]
 
@@ -122,8 +123,8 @@ class EquationSolverUi(QMainWindow):
         x = numpy.arange(-20, 20, 0.1)
         self.func_plot.plot(x, [out.function(z) for z in x], 'r',
          x, [out.boundary_function(z) for z in x], 'g')
-        plt.draw()
-        plt.show()
+        #plt.draw()
+        #plt.show()
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
@@ -158,10 +159,12 @@ class EquationSolverUi(QMainWindow):
         return new_tab
     def tabChanged(self, index):
         print(index)
+        self.error_plot.clear()
+        print(self.out)
         if self.out is None:
             return
         self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)#, ax=self.error_plot
-        plt.draw()
+        #plt.draw()
         #plt.show()
 
     def clear(self):
