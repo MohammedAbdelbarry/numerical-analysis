@@ -1,8 +1,14 @@
+import timeit
+
 import sympy
 import numpy
 from part1_output import Output
 from equations_util import create_dataframe_part2
 import timeit
+
+import equations_util
+from part1_output import Output
+
 
 def _eliminate(system: sympy.Matrix, i, j):
     """
@@ -59,14 +65,27 @@ def _forward_sub(a: sympy.Matrix, b:sympy.Matrix, index_map=None):
     return y
 
 
-def gauss(system: sympy.Matrix):
+def _get_max_elem(system, i):
+    n = system.shape[0]
+    max_mag, max_ind = abs(system[i, i]), i
+    for j in range(i + 1, n):
+        if abs(system[j, i]) > max_mag:
+            max_mag, max_ind = abs(system[j, i]), j
+    return max_ind
+
+
+def gauss(system: sympy.Matrix, symbol_list: list):
     """
     Performs gauss elimination with partial pivoting on a system of
     linear equations.
     :param system: system of linear equations.
+    :param symbol_list: list of symbols used in the equations.
     :return: a [n, 1] matrix containing result.
     """
+    output = Output()
+    output.title = "Gaussian-Elimination"
     n = system.shape[0]
+    begin = timeit.default_timer()
     # iterate over columns
     for i in range(0, n):
         # find maximum magnitude and index in this column
@@ -77,27 +96,25 @@ def gauss(system: sympy.Matrix):
         for j in range(i + 1, n):
             _eliminate(system, i, j)
     # perform back substitution.
-    return _back_sub(system)
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, _back_sub(system)))
+    return output
 
 
-def _get_max_elem(system, i):
-    n = system.shape[0]
-    max_mag, max_ind = abs(system[i, i]), i
-    for j in range(i + 1, n):
-        if abs(system[j, i]) > max_mag:
-            max_mag, max_ind = abs(system[j, i]), j
-    return max_ind
-
-
-def gauss_jordan(system: sympy.Matrix):
+def gauss_jordan(system: sympy.Matrix, symbol_list):
     """
     Performs gauss jordan elimination with partial pivoting on a system of
     linear equations.
     :param system: system of linear equations.
+    :param symbol_list: list of symbols used in the equations.
     :return: a [n, 1] matrix (vector) containing result.
     """
     system = system.as_mutable()
     n = system.shape[0]
+    output = Output()
+    output.title = "Gauss Jordan"
+    begin = timeit.default_timer()
     # iterate over rows
     for i in range(0, n):
         # find maximum magnitude and index in this column
@@ -112,8 +129,11 @@ def gauss_jordan(system: sympy.Matrix):
         # forward elimination, iterate over previous rows and eliminate
         for j in range(i - 1, -1, -1):
             _eliminate(system, i, j)
-    # return last column reversed
-    return sympy.Matrix(system.col(system.shape[0]))
+    # return last column
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, sympy.Matrix(system.col(system.shape[0]))))
+    return output
 
 
 def _decompose(a, indexMap):
@@ -133,19 +153,25 @@ def _decompose(a, indexMap):
     return a, indexMap
 
 
-def lu_decomp(system: sympy.Matrix):
+def lu_decomp(system: sympy.Matrix, symbol_list):
     # TODO: Check for sigularity.
     system = system.as_mutable()
+    output = Output()
+    output.title = "LU Decomposition"
+    begin = timeit.default_timer()
     n = system.shape[0]
     a = system[:, :n]
     b = system[:, n]
     indexMap = numpy.array(range(n), dtype=numpy.int)
     a, indexMap = _decompose(a, indexMap)
     y = _forward_sub(a, b, indexMap)
-    return _back_sub(a.row_join(y), indexMap)
+    output.dataframes.append(equations_util.create_equ_sys_df(symbol_list, _back_sub(a.row_join(y), indexMap)))
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    return  output
 
 
-def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
+def jacobi(A: sympy.Matrix, symbols: list, max_iter=100, max_err=1e-5, x=None, b=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
     takes a system of linear equations and returns an approximate solution
     for the system using Jacobi's approximation.
@@ -167,7 +193,6 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
     of x during each iteration.
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
-
     n = len(symbols)
     output = Output()
     output.title = "Jacobi"
@@ -198,7 +223,7 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
     return output
 
 
-def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
+def gauss_seidel(A: sympy.Matrix, symbols: list, max_iter=100, max_err=1e-5, x=None, b=None):
     """Gauss-Seidel Iterative Method for Solving A System of Linear Equations:
     takes a system of linear equations and returns an approximate solution
     for the system using Gauss-Seidel approximation.

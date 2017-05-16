@@ -165,6 +165,7 @@ class EquationSolverUi(QMainWindow):
         new_tab.setLayout(vbox_layout)
         return new_tab
 
+
     def tab_changed(self, index):
         self.error_plot.clear()
         if self.out is None:

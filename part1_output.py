@@ -1,5 +1,6 @@
 import numpy
 
+
 class Output:
     """
     A data holder class that contains the output of the root finding methods.
@@ -14,6 +15,7 @@ class Output:
     boundary_function: the boundary function
     exection_time: a float representing the execution time
     """
+
     def __init__(self):
         self.dataframes = []
         self.roots = numpy.empty(0, dtype=numpy.float64)

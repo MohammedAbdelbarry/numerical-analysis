@@ -18,7 +18,7 @@
     <item>
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="1">
-       <widget class="QTextEdit" name="textEdit">
+       <widget class="QTextEdit" name="equations_text">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -31,14 +31,14 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="equ_label">
         <property name="text">
-         <string>Eqiuations</string>
+         <string>Equations</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="max_iter_label">
         <property name="text">
          <string>Max Iterations</string>
         </property>
@@ -47,7 +47,7 @@
       <item row="1" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="iter_line">
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -73,14 +73,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="eps_label">
           <property name="text">
            <string>Epsilon</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_2">
+         <widget class="QLineEdit" name="eps_line">
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -108,7 +108,7 @@
        </layout>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="methods_label">
         <property name="text">
          <string>Methods</string>
         </property>
@@ -134,12 +134,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Gauss-Seidel</string>
+          <string>LU Decomposition</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>LU Decomposition</string>
+          <string>Gauss-Seidel</string>
          </property>
         </item>
         <item>
@@ -152,31 +152,10 @@
      </layout>
     </item>
     <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Tab 1</string>
-       </attribute>
-       <widget class="QTableWidget" name="tableWidget">
-        <property name="geometry">
-         <rect>
-          <x>-10</x>
-          <y>0</y>
-          <width>791</width>
-          <height>241</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Tab 2</string>
-       </attribute>
-      </widget>
-     </widget>
+     <widget class="QTabWidget" name="table_tab_widget"/>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="solve_btn">
       <property name="maximumSize">
        <size>
         <width>100</width>
@@ -188,6 +167,22 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="error_msg">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: red</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -196,7 +191,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
