@@ -49,21 +49,21 @@ class EquationSolverUi(QMainWindow):
                             newton_mod2, regula_falsi, secant, birge_vieta]
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
+        self.figs = [(plt.Figure(), self.func_plot, self.func_tab), (plt.Figure(), self.error_plot, self.error_tab)]
+        self.tabWidget_2.currentChanged.connect(EquationSolverUi.tabChanged)
         self.render_figs()
 
     def render_figs(self):
-        figs = [[plt.Figure(), self.func_plot, self.func_tab],
-                [plt.Figure(), self.error_plot, self.error_tab]]
-        for lst in figs:
-            lst[1] = lst[0].add_subplot(111)
-            lst[1].grid(True)
-            canvas = FigureCanvas(lst[0])
+        for (fig, plot, tab) in self.figs:
+            plot = fig.add_subplot(111)
+            plot.grid(True)
+            canvas = FigureCanvas(fig)
             layout = QVBoxLayout()
             layout.addWidget(canvas)
-            toolbar = NavigationToolbar(canvas, lst[2], coordinates=True)
+            toolbar = NavigationToolbar(canvas, tab, coordinates=True)
             layout.addWidget(toolbar)
-        self.func_plot = figs[0][1]
-        self.error_plot = figs[1][1]
+        self.func_plot = self.figs[0][1]
+        self.error_plot = self.figs[1][1]
 
     @staticmethod
     def extract_guesses(guesses):
@@ -117,8 +117,11 @@ class EquationSolverUi(QMainWindow):
         self.error_msg.setText(msg)
 
     def update_plots(self, out):
-        # out.dataframes[0].plot(ax=self.func_plot)
-        pass
+        x = numpy.arange(-10, 10, 0.1)
+        print(out.dataframes[0], self.func_plot)
+        out.dataframes[0].plot(ax=self.func_plot)
+        #plt.plot(x, [out.function(z) for z in x], 'r', x, [out.boundary_function(z) for z in x], 'g')
+    pass
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
@@ -145,12 +148,15 @@ class EquationSolverUi(QMainWindow):
         form_layout.addWidget(error_label)
         form_layout.addWidget(exec_time_label)
         form_layout.addWidget(error_bound_label)
-        
+
         view.setModel(model)
         vbox_layout.addWidget(view)
         vbox_layout.addLayout(form_layout)
         new_tab.setLayout(vbox_layout)
         return new_tab
+    @staticmethod
+    def tabChanged(index):
+        print(index)
 
     def clear(self):
         self.error_msg.setText("")

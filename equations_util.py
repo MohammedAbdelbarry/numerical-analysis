@@ -98,7 +98,7 @@ def diff(expr: sympy.Expr):
 
 def expr_to_lambda(expr: sympy.Expr):
     symbol = get_symbol(expr)
-    if symbol == None:
+    if symbol is None:
         val = expr.evalf()
         return lambda x: val
     return sympy.lambdify(symbol, expr)
