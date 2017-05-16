@@ -2,7 +2,7 @@ import sys
 from EquSys import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
-                             QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel)
+                             QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel, QFileDialog)
 from PyQt5.uic import loadUi
 
 from equations_util import equations_to_aug_matrix
@@ -45,6 +45,7 @@ class LinearEquationsSolver(QMainWindow):
         loadUi('part2.ui', self)
         self.method_list = [gauss, gauss_jordan, lu_decomp, gauss_seidel, jacobi]
         self.solve_btn.clicked.connect(self.solve_linear_eqs)
+        self.actionLoad_File.triggered.connect(self.load_file)
 
     @staticmethod
     def extract_equations(equations):
@@ -78,19 +79,26 @@ class LinearEquationsSolver(QMainWindow):
                     if i < 3:
                         out = self.method_list[i](aug_mat, symb_list)
                     else:
-                        out = self.method_list[i](aug_mat, symb_list, max_iter = iter, max_err = eps)
+                        out = self.method_list[i](aug_mat, symb_list, max_iter=iter, max_err=eps)
                     self.table_tab_widget.addTab(self._setup_tab(out), out.title)
             else:
                 if self.method_select.currentIndex() < 3:
                     out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list)
                 else:
-                    out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list, max_iter = iter, max_err = eps)
+                    out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list, max_iter=iter,
+                                                                              max_err=eps)
                 self.table_tab_widget.addTab(self._setup_tab(out), out.title)
         except Exception as e:
             self.show_error_msg(str(e))
 
     def show_error_msg(self, msg):
         self.error_msg.setText(msg)
+
+    def load_file(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file')
+        if fname[0]:
+            with open(fname[0], 'r') as f:
+                data = f.read()
 
     @staticmethod
     def _setup_tab(out: Output):

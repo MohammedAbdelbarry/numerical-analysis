@@ -6,7 +6,7 @@ from pandas import DataFrame
 from Equations import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
-                             QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel)
+                             QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel, QFileDialog)
 from PyQt5.uic import loadUi
 
 
@@ -54,6 +54,7 @@ class EquationSolverUi(QMainWindow):
         self.out = None
         self.func_canvas = self.error_canvas = None
         self.render_figs()
+        self.actionLoad_File.triggered.connect(self.load_file)
 
     def render_figs(self):
         canvases = []
@@ -164,6 +165,12 @@ class EquationSolverUi(QMainWindow):
         vbox_layout.addLayout(form_layout)
         new_tab.setLayout(vbox_layout)
         return new_tab
+
+    def load_file(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file')
+        if fname[0]:
+            with open(fname[0], 'r') as f:
+                data = f.read()
 
     def tab_changed(self, index):
         self.error_plot.clear()
