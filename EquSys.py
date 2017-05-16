@@ -191,10 +191,10 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
             break
     end = timeit.default_timer()
     output.execution_time = abs(end - begin)
-    output.roots = numpy.array(x).astype(numpy.float64)[0]
+    output.roots = numpy.array(x[:]).astype(numpy.float64)
     output.errors = numpy.append(output.errors, err)
     output.dataframes.append(create_dataframe_part2(x_hist, err, symbols))
-    return numpy.array(x).astype(numpy.float64), output
+    return output
 
 
 def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
@@ -220,6 +220,8 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
     n = A.shape[0]
+    output = Output()
+    output.title = "Gauss-Seidel"
     if b is None:
         A, b = [A[:, :-1], A[:, -1]]
     if x is None:
@@ -227,6 +229,7 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
     x_prev = x[:, :]
     err_hist = []
     x_hist = sympy.Matrix(x)
+    begin = timeit.default_timer()
     for _ in range(0, max_iter):
         for i in range(0, n):
             xi_new = b[i]
@@ -241,6 +244,9 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
         x_prev = x[:, :]
         if err < max_err:
             break
-    return numpy.array(x).astype(numpy.float64),
-    numpy.array(x_hist).astype(numpy.float64),
-    numpy.array(err_hist).astype(numpy.float64)
+    end = timeit.default_timer()
+    output.execution_time = abs(end - begin)
+    output.roots = numpy.array(x[:]).astype(numpy.float64)
+    output.errors = numpy.append(output.errors, err)
+    output.dataframes.append(create_dataframe_part2(x_hist, err, symbols))
+    return output
