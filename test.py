@@ -1,5 +1,6 @@
 from Equations import *
 from EquSys import *
+from equations_util import *
 from sympy.abc import x, y, z
 
 methods = {'Newton-Raphson': newton, 'Secant': secant, 'Bisection': bisection,

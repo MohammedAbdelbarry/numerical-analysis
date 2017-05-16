@@ -299,7 +299,7 @@ def illinois(expr, arguments, max_err=1e-5, max_iter=50):
             i += 1
             continue
 
-        prev_xi = 0
+        prev_xi = err = 0
         cur_xi = cur_err_i = numpy.empty(0, dtype=numpy.float64)
 
         for _ in range(0, max_iter):
@@ -329,6 +329,8 @@ def illinois(expr, arguments, max_err=1e-5, max_iter=50):
 
         output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol, counter))
         i += 1
+        output.roots = numpy.append(output.roots, prev_xi)
+        output.errors = numpy.append(output.errors, err)
         counter += 1
 
     end_time = timeit.default_timer()
