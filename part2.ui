@@ -147,6 +147,11 @@
           <string>Jacobi Elimination</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>All methods</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
