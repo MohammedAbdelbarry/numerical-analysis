@@ -6,7 +6,7 @@ from pandas import DataFrame
 from Equations import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
-QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel)
+                             QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel)
 from PyQt5.uic import loadUi
 
 
@@ -50,11 +50,10 @@ class EquationSolverUi(QMainWindow):
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
         self.figs = [[plt.figure(0), self.func_plot, self.func_tab], [plt.figure(1), self.error_plot, self.error_tab]]
-        self.tabWidget_2.currentChanged.connect(self.tabChanged)
+        self.tabWidget_2.currentChanged.connect(self.tab_changed)
         self.out = None
         self.func_canvas = self.error_canvas = None
         self.render_figs()
-
 
     def render_figs(self):
         canvases = []
@@ -73,11 +72,9 @@ class EquationSolverUi(QMainWindow):
         self.error_plot = self.figs[1][1]
         self.func_canvas, self.error_canvas = canvases[0], canvases[1]
 
-
     @staticmethod
     def extract_guesses(guesses):
         return [float(x.strip()) for x in str(guesses).strip().split(',')]
-
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
@@ -124,10 +121,8 @@ class EquationSolverUi(QMainWindow):
         except Exception as e:
             self.show_error_msg(str(e))
 
-
     def show_error_msg(self, msg):
         self.error_msg.setText(msg)
-
 
     def update_plots(self, out):
         x = numpy.arange(-20, 20, 0.1)
@@ -137,7 +132,6 @@ class EquationSolverUi(QMainWindow):
         self.func_plot.plot(x, [out.boundary_function(z) for z in x], 'g', label="g")
         plt.legend("")
         self.func_canvas.draw()
-
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
@@ -171,14 +165,12 @@ class EquationSolverUi(QMainWindow):
         new_tab.setLayout(vbox_layout)
         return new_tab
 
-
-    def tabChanged(self, index):
+    def tab_changed(self, index):
         self.error_plot.clear()
         if self.out is None:
             return
-        self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)#, ax=self.error_plot
+        self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
-
 
     def clear(self):
         self.error_msg.setText("")
