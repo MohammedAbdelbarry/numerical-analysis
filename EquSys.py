@@ -171,7 +171,7 @@ def lu_decomp(system: sympy.Matrix, symbol_list):
     return  output
 
 
-def jacobi(A: sympy.Matrix, symbols: list, max_iter=100, max_err=1e-5, x=None, b=None):
+def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
     takes a system of linear equations and returns an approximate solution
     for the system using Jacobi's approximation.
@@ -223,7 +223,7 @@ def jacobi(A: sympy.Matrix, symbols: list, max_iter=100, max_err=1e-5, x=None, b
     return output
 
 
-def gauss_seidel(A: sympy.Matrix, symbols: list, max_iter=100, max_err=1e-5, x=None, b=None):
+def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
     """Gauss-Seidel Iterative Method for Solving A System of Linear Equations:
     takes a system of linear equations and returns an approximate solution
     for the system using Gauss-Seidel approximation.

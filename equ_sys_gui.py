@@ -78,13 +78,13 @@ class LinearEquationsSolver(QMainWindow):
                     if i < 3:
                         out = self.method_list[i](aug_mat, symb_list)
                     else:
-                        out = self.method_list[i](aug_mat, symb_list, iter, eps)
+                        out = self.method_list[i](aug_mat, symb_list, max_iter = iter, max_err = eps)
                     self.table_tab_widget.addTab(self._setup_tab(out), out.title)
             else:
                 if self.method_select.currentIndex() < 3:
                     out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list)
                 else:
-                    out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list, iter, eps)
+                    out = self.method_list[self.method_select.currentIndex()](aug_mat, symb_list, max_iter = iter, max_err = eps)
                 self.table_tab_widget.addTab(self._setup_tab(out), out.title)
         except Exception as e:
             self.show_error_msg(str(e))
