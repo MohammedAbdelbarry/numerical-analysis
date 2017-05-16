@@ -177,12 +177,13 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
         x = sympy.Matrix.zeros(n, 1)
     D = A.multiply_elementwise(sympy.Matrix.eye(n))
     x_prev = x[:, :]
-    err_hist = []
+    err_hist = [float('NaN')]
     x_hist = sympy.Matrix(x)
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         x = D.inv() * (b - (A - D) * x)
         x_hist = x_hist.row_join(x)
+        #print("XHIST:\n", x_hist)
         diff = (x - x_prev).applyfunc(abs)
         err = numpy.amax(numpy.array(diff).astype(numpy.float64))
         err_hist.append(err)
@@ -193,7 +194,7 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
     output.execution_time = abs(end - begin)
     output.roots = numpy.array(x[:]).astype(numpy.float64)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe_part2(x_hist, err, symbols))
+    output.dataframes.append(create_dataframe_part2(x_hist, err_hist, symbols))
     return output
 
 
@@ -227,7 +228,7 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
     if x is None:
         x = sympy.Matrix.zeros(n, 1)
     x_prev = x[:, :]
-    err_hist = []
+    err_hist = [float('NaN')]
     x_hist = sympy.Matrix(x)
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
@@ -248,5 +249,5 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
     output.execution_time = abs(end - begin)
     output.roots = numpy.array(x[:]).astype(numpy.float64)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe_part2(x_hist, err, symbols))
+    output.dataframes.append(create_dataframe_part2(x_hist, err_hist, symbols))
     return output

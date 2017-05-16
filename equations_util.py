@@ -78,7 +78,7 @@ def create_dataframe(x: list, f,
 def create_dataframe_part2(x: sympy.Matrix, err: list, symbol: sympy.Symbol):
     out = dict()
     for i in range(x.shape[0]):
-        out[str(symbol[i])] = numpy.array(x[:, i]).astype(numpy.float64)[0]
+        out[str(symbol[i])] = numpy.array(x[i, :][:]).astype(numpy.float64)
     out["Error"] = err
     return pandas.DataFrame(out)
 
