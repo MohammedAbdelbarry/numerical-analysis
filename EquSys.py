@@ -193,7 +193,7 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
     of x during each iteration.
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
-    n = A.shape[0]
+    n = len(symbols)
     output = Output()
     output.title = "Jacobi"
     if b is None:
@@ -245,7 +245,7 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
     of x during each iteration.
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
-    n = A.shape[0]
+    n = len(symbols)
     output = Output()
     output.title = "Gauss-Seidel"
     if b is None:

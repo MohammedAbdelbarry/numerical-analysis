@@ -1,5 +1,6 @@
 from Equations import *
 from EquSys import *
+from equations_util import *
 from sympy.abc import x, y, z
 
 methods = {'Newton-Raphson': newton, 'Secant': secant, 'Bisection': bisection,
@@ -20,7 +21,7 @@ aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28",
 #sympy.pprint(sympy.N(lu_decomp(m), 4))
 #print(gauss_seidel(m, sym))
 #print(jacobi(m, sym))
-print(sympy.solve_linear_system(aug, *sym))
+print(sympy.solve_linear_system(aug, *sym))#"4*x+12*y+16*z=104"
 # print(sympy.Matrix(reversed(m.col(m.shape[0]))))
 # print(m.col(m.shape[0]).tolist()[0][0])
 #sympy.pprint(sympy.N(gauss_jordan(aug), 4))
