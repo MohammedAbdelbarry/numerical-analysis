@@ -88,7 +88,7 @@ def create_equ_sys_df(symbol_list, value_list):
 def create_dataframe_part2(x: sympy.Matrix, err: list, symbol: sympy.Symbol):
     out = dict()
     for i in range(x.shape[0]):
-        out[str(symbol[i])] = numpy.array(x[:, i]).astype(numpy.float64)[0]
+        out[str(symbol[i])] = numpy.array(x[i, :][:]).astype(numpy.float64)
     out["Error"] = err
     return pandas.DataFrame(out)
 
