@@ -2,6 +2,8 @@ import timeit
 
 import sympy
 import numpy
+from part1_output import Output
+from equations_util import create_dataframe_part2
 
 import equations_util
 from part1_output import Output
@@ -168,7 +170,7 @@ def lu_decomp(system: sympy.Matrix, symbol_list):
     return  output
 
 
-def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
+def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
     """Jacobi Iterative Method for Solving A System of Linear Equations:
     takes a system of linear equations and returns an approximate solution
     for the system using Jacobi's approximation.
@@ -176,6 +178,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     Keyword arguments:
     A: sympy.Matrix -- The augmented matrix representing the system if b = None
     else the coefficients matrix. A is an [n, n] matrix.
+    symbols: list of sympy.Symbol representing the variables' names.
     b: sympy.Matrix -- The r.h.s matrix of the system. b is an n-dimensional
     vector.
     max_iter: int -- The maximum number of iterations to perform.
@@ -190,6 +193,7 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
     n = A.shape[0]
+    output = Output()
     if b is None:
         A, b = [A[:, :-1], A[:, -1]]
     if x is None:
@@ -207,12 +211,11 @@ def jacobi(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
         x_prev = x[:, :]
         if err < max_err:
             break
-    return numpy.array(x).astype(numpy.float64),
-    numpy.array(x_hist).astype(numpy.float64),
-    numpy.array(err_hist).astype(numpy.float64)
+    output.dataframes.append(create_dataframe_part2(x_hist, err, symbols))
+    return numpy.array(x).astype(numpy.float64), output
 
 
-def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
+def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x=None):
     """Gauss-Seidel Iterative Method for Solving A System of Linear Equations:
     takes a system of linear equations and returns an approximate solution
     for the system using Gauss-Seidel approximation.
@@ -220,6 +223,7 @@ def gauss_seidel(A: sympy.Matrix, b=None, max_iter=100, max_err=1e-5, x=None):
     Keyword arguments:
     A: sympy.Matrix -- The augmented matrix representing the system if b = None
     else the coefficients matrix. A is an [n, n] matrix.
+    symbols: list of sympy.Symbol representing the variables' names.
     b: sympy.Matrix -- The r.h.s matrix of the system. b is an n-dimensional
     vector.
     max_iter: int -- The maximum number of iterations to perform.
