@@ -52,9 +52,11 @@ class EquationSolverUi(QMainWindow):
         self.figs = [[plt.figure(0), self.func_plot, self.func_tab], [plt.figure(1), self.error_plot, self.error_tab]]
         self.tabWidget_2.currentChanged.connect(self.tabChanged)
         self.out = None
+        self.func_canvas = self.error_canvas = None
         self.render_figs()
 
     def render_figs(self):
+        canvases = []
         for i, (fig, plot, tab) in enumerate(self.figs):
             self.figs[i][1] = fig.add_subplot(111)
             self.figs[i][1].grid(True)
@@ -64,9 +66,11 @@ class EquationSolverUi(QMainWindow):
             toolbar = NavigationToolbar(canvas, tab, coordinates=True)
             layout.addWidget(toolbar)
             tab.setLayout(layout)
+            canvases.append(canvas)
             canvas.draw()
         self.func_plot = self.figs[0][1]
         self.error_plot = self.figs[1][1]
+        self.func_canvas, self.error_canvas = canvases[0], canvases[1]
 
     @staticmethod
     def extract_guesses(guesses):
@@ -123,8 +127,7 @@ class EquationSolverUi(QMainWindow):
         x = numpy.arange(-20, 20, 0.1)
         self.func_plot.plot(x, [out.function(z) for z in x], 'r',
          x, [out.boundary_function(z) for z in x], 'g')
-        #plt.draw()
-        #plt.show()
+        self.func_canvas.draw()
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
@@ -158,14 +161,11 @@ class EquationSolverUi(QMainWindow):
         new_tab.setLayout(vbox_layout)
         return new_tab
     def tabChanged(self, index):
-        print(index)
         self.error_plot.clear()
-        print(self.out)
         if self.out is None:
             return
         self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)#, ax=self.error_plot
-        #plt.draw()
-        #plt.show()
+        self.error_canvas.draw()
 
     def clear(self):
         self.error_msg.setText("")
