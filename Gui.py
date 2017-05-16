@@ -55,6 +55,7 @@ class EquationSolverUi(QMainWindow):
         self.func_canvas = self.error_canvas = None
         self.render_figs()
 
+
     def render_figs(self):
         canvases = []
         for i, (fig, plot, tab) in enumerate(self.figs):
@@ -72,9 +73,11 @@ class EquationSolverUi(QMainWindow):
         self.error_plot = self.figs[1][1]
         self.func_canvas, self.error_canvas = canvases[0], canvases[1]
 
+
     @staticmethod
     def extract_guesses(guesses):
         return [float(x.strip()) for x in str(guesses).strip().split(',')]
+
 
     @QtCore.pyqtSlot()
     def solve_eq(self):
@@ -104,6 +107,7 @@ class EquationSolverUi(QMainWindow):
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
                     self.out = out = method(expr, guesses, eps, iter)
+                    self.update_plots(out)
                     if len(out.dataframes > 1):
                         for i in range(0, len(out.dataframes)):
                             self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
@@ -111,23 +115,29 @@ class EquationSolverUi(QMainWindow):
                         self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
                 self.out = out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
+                self.update_plots(out)
                 if len(out.dataframes) > 1:
                     for i in range(0, len(out.dataframes)):
                         self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
                 else:
                     self.tabWidget_2.addTab(self._setup_tab(out), out.title)
-                    self.update_plots(out)
         except Exception as e:
             self.show_error_msg(str(e))
+
 
     def show_error_msg(self, msg):
         self.error_msg.setText(msg)
 
+
     def update_plots(self, out):
         x = numpy.arange(-20, 20, 0.1)
-        self.func_plot.plot(x, [out.function(z) for z in x], 'r',
-         x, [out.boundary_function(z) for z in x], 'g')
+        self.func_plot.clear()
+        self.func_plot.grid(True)
+        self.func_plot.plot(x, [out.function(z) for z in x], 'r', label="f")
+        self.func_plot.plot(x, [out.boundary_function(z) for z in x], 'g', label="g")
+        plt.legend("")
         self.func_canvas.draw()
+
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
@@ -160,12 +170,15 @@ class EquationSolverUi(QMainWindow):
         vbox_layout.addLayout(form_layout)
         new_tab.setLayout(vbox_layout)
         return new_tab
+
+
     def tabChanged(self, index):
         self.error_plot.clear()
         if self.out is None:
             return
         self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)#, ax=self.error_plot
         self.error_canvas.draw()
+
 
     def clear(self):
         self.error_msg.setText("")
