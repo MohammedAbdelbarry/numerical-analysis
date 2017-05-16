@@ -5,8 +5,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from pandas import DataFrame
 from Equations import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QErrorMessage, QMessageBox, QWidget, QFormLayout, QTableView, \
-    QVBoxLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
+QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel)
 from PyQt5.uic import loadUi
 
 
@@ -49,15 +49,17 @@ class EquationSolverUi(QMainWindow):
                             newton_mod2, regula_falsi, secant, birge_vieta]
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
-        self.figs = [(plt.Figure(), self.func_plot, self.func_tab), (plt.Figure(), self.error_plot, self.error_tab)]
-        self.tabWidget_2.currentChanged.connect(EquationSolverUi.tabChanged)
+        self.figs = [[plt.figure(0), self.func_plot, self.func_tab], [plt.figure(1), self.error_plot, self.error_tab]]
+        self.tabWidget_2.currentChanged.connect(self.tabChanged)
+        self.out = None
         self.render_figs()
 
     def render_figs(self):
-        for (fig, plot, tab) in self.figs:
-            plot = fig.add_subplot(111)
-            plot.grid(True)
+        for i, (fig, plot, tab) in enumerate(self.figs):
+            self.figs[i][1] = fig.add_subplot(111)
+            self.figs[i][1].grid(True)
             canvas = FigureCanvas(fig)
+            self.figs[i][1].plot(range(1, 10), range(2, 20, 2))
             layout = QVBoxLayout()
             layout.addWidget(canvas)
             toolbar = NavigationToolbar(canvas, tab, coordinates=True)
@@ -96,14 +98,14 @@ class EquationSolverUi(QMainWindow):
         try:
             if self.method_select.currentText() == "All methods":
                 for method in self.method_list:
-                    out = method(expr, guesses, eps, iter)
+                    self.out = out = method(expr, guesses, eps, iter)
                     if len(out.dataframes > 1):
                         for i in range(0, len(out.dataframes)):
                             self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
                     else:
                         self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
-                out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
+                self.out = out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
                 if len(out.dataframes) > 1:
                     for i in range(0, len(out.dataframes)):
                         self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
@@ -117,11 +119,11 @@ class EquationSolverUi(QMainWindow):
         self.error_msg.setText(msg)
 
     def update_plots(self, out):
-        x = numpy.arange(-10, 10, 0.1)
-        print(out.dataframes[0], self.func_plot)
-        out.dataframes[0].plot(ax=self.func_plot)
-        #plt.plot(x, [out.function(z) for z in x], 'r', x, [out.boundary_function(z) for z in x], 'g')
-    pass
+        x = numpy.arange(-20, 20, 0.1)
+        self.func_plot.plot(x, [out.function(z) for z in x], 'r',
+         x, [out.boundary_function(z) for z in x], 'g')
+        plt.draw()
+        plt.show()
 
     @staticmethod
     def _setup_tab(out: Output, index=None):
@@ -154,13 +156,19 @@ class EquationSolverUi(QMainWindow):
         vbox_layout.addLayout(form_layout)
         new_tab.setLayout(vbox_layout)
         return new_tab
-    @staticmethod
-    def tabChanged(index):
+    def tabChanged(self, index):
         print(index)
+        if self.out is None:
+            return
+        self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)#, ax=self.error_plot
+        plt.draw()
+        #plt.show()
 
     def clear(self):
         self.error_msg.setText("")
-        self.tabWidget.clear()
+        self.out = None
+        self.error_plot.clear()
+        self.func_plot.clear()
         self.tabWidget_2.clear()
 
 
