@@ -6,6 +6,7 @@ from part1_output import Output
 import matplotlib.pyplot
 import timeit
 from equations_util import *
+from math import log2
 
 
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
@@ -59,6 +60,7 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Bisection", f, lambda x: x / 2)
+    output.error_bound = abs(log2(abs(xu - xl)) - log2(max_err))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
     begin = timeit.default_timer()
