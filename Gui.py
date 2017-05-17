@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
                              QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel, QFileDialog)
 from PyQt5.uic import loadUi
 import os.path
-from bisect import bisect_left
+from bisect import bisect_right
 
 class PandasModel(QtCore.QAbstractTableModel):
     """
@@ -131,11 +131,12 @@ class EquationSolverUi(QMainWindow):
                     self.equ_line.setEnabled(True)
                     self.solve_btn.setText("Solve")
         elif self.method_select.currentText() == 'All methods':
+            self.clear()
             self.solving_all_flag = True
             self.method_select.setEnabled(False)
             self.equ_line.setEnabled(False)
             self.solve_btn.setText("Continue")
-            self.solve_eq()
+            #self.solve_eq()
         else:
             self.clear()
             try:
@@ -226,13 +227,15 @@ class EquationSolverUi(QMainWindow):
         self.error_plot.clear()
         if not self.outs:
             return
-        i = bisect_left(self.indices, index)
+        i = bisect_right(self.indices, index)
         if i:
             i -= 1
+        print(i, index, self.indices[i])
         self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
          title=self.outs[i].title, ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
-        print(self.outs[i].error_bound)
+        print(self.indices)
+        print(len(self.outs))
 
     def clear(self):
         self.error_msg.setText("")
