@@ -45,6 +45,8 @@ class PandasModel(QtCore.QAbstractTableModel):
 class EquationSolverUi(QMainWindow):
     def __init__(self, *args):
         super(EquationSolverUi, self).__init__(*args)
+        self.failures = 0
+        self.counter = 0
         loadUi('part1.ui', self)
         self.method_list = [bisection, fixed_point, newton, newton_mod1,
                             newton_mod2, regula_falsi, secant, birge_vieta, illinois]
@@ -58,6 +60,7 @@ class EquationSolverUi(QMainWindow):
         self.render_figs()
         self.actionLoad_File.triggered.connect(self.load_file)
         self.actionSave_File.triggered.connect(self.save_file)
+        self.solving_all_flag = False
 
     def render_figs(self):
         canvases = []
@@ -77,59 +80,68 @@ class EquationSolverUi(QMainWindow):
         self.func_canvas, self.error_canvas = canvases[0], canvases[1]
 
     @staticmethod
-    def extract_guesses(guesses):
-        return [float(x.strip()) for x in str(guesses).strip().split(',')]
+    def extract_args(args):
+        return [float(x.strip()) for x in str(args).strip().split(',')]
 
-    @QtCore.pyqtSlot()
-    def solve_eq(self):
-        self.clear()
-        expr = iter = eps = guesses = None
+    def extract_info(self):
         try:
             expr = string_to_expression(self.equ_line.text())
         except:
-            self.show_error_msg("Error: Invalid Equation Format")
-            return
+            raise ValueError("Invalid expression")
         try:
             iter = int(self.iter_line.text())
-        except ValueError:
-            self.show_error_msg("Error: Invalid Maximum Iterations Format")
-            return
+        except:
+            raise ValueError("Invalid number of iterations")
         try:
             eps = float(self.eps_line.text())
-        except ValueError:
-            self.show_error_msg("Error: Invalid Epsilon Format")
-            return
-        try:
-            guesses = self.extract_guesses(self.guess_line.text())
         except:
-            self.show_error_msg("Error: Invalid 'Guesses' Format")
-            return
+            raise ValueError("Invalid epsilon")
         try:
-            if self.method_select.currentText() == "All methods":
-                counter = 0
-                for method in self.method_list:
-                    out = method(expr, guesses, eps, iter)
-                    self.outs.append(out)
-                    self.update_plots(out)
-                    self.indices.append(self.indices[counter] + len(out.dataframes))
-                    counter += 1
-                    if len(out.dataframes > 1):
-                        for i in range(0, len(out.dataframes)):
-                            self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
-                    else:
-                        self.tabWidget_2.addTab(self._setup_tab(out), out.title)
-            else:
-                out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
-                self.indices.append(self.indices[0] + len(out.dataframes))
-                self.outs.append(out)
-                self.update_plots(out)
-                if len(out.dataframes) > 1:
-                    for i in range(0, len(out.dataframes)):
-                        self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
-                else:
-                    self.tabWidget_2.addTab(self._setup_tab(out), out.title)
-        except Exception as e:
-            self.show_error_msg(str(e))
+            args = self.extract_args(self.guess_line.text())
+        except:
+            raise ValueError("Invalid arguments")
+        return expr, iter, eps, args
+
+    def solve_single(self, func):
+        expr, iter, eps, args = self.extract_info()
+        out = func(expr, args, eps, iter)
+        self.indices.append(self.indices[self.counter - self.failures] + len(out.dataframes))
+        self.outs.append(out)
+        self.update_plots(out)
+        if len(out.dataframes) > 1:
+            for i in range(0, len(out.dataframes)):
+                self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
+        else:
+            self.tabWidget_2.addTab(self._setup_tab(out), out.title)
+
+    @QtCore.pyqtSlot()
+    def solve_eq(self):
+        if self.solving_all_flag:
+            try:
+                self.solve_single(self.method_list[self.counter])
+            except Exception as e:
+                self.failures += 1
+                self.show_error_msg(str(e))
+            finally:
+                self.counter += 1
+                if self.counter == len(self.method_list):
+                    self.counter = self.failures = 0
+                    self.solving_all_flag = False
+                    self.method_select.setEnabled(True)
+                    self.equ_line.setEnabled(True)
+                    self.solve_btn.setText("Solve")
+        elif self.method_select.currentText() == 'All methods':
+            self.solving_all_flag = True
+            self.method_select.setEnabled(False)
+            self.equ_line.setEnabled(False)
+            self.solve_btn.setText("Continue")
+            self.solve_eq()
+        else:
+            self.clear()
+            try:
+                self.solve_single(self.method_list[self.method_select.currentIndex()])
+            except Exception as e:
+                self.show_error_msg(str(e))
 
     def show_error_msg(self, msg):
         self.error_msg.setText(msg)
@@ -212,12 +224,11 @@ class EquationSolverUi(QMainWindow):
 
     def tab_changed(self, index):
         self.error_plot.clear()
-        if self.outs is None:
+        if not self.outs:
             return
         i = bisect_left(self.indices, index)
         if i:
             i -= 1
-        print(i, index)
         self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
          title=self.outs[i].title, ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
