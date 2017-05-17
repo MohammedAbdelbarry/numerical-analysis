@@ -6,8 +6,7 @@ from part1_output import Output
 import matplotlib.pyplot
 import timeit
 from equations_util import *
-from math import log2
-
+from math import log2, ceil
 
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     if len(arguments) != 2:
@@ -36,12 +35,18 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
         else:
             err = 0
         prev_xr = xr
-        prev_xr = xr
         cur_xi = numpy.append(cur_xi, xr)
         cur_err_i = numpy.append(cur_err_i, err)
         if err <= max_err:
             break
     end = timeit.default_timer()
+    try:
+        yl = f(xl)
+        yu = f(xu)
+        x_next = (xl * yu - xu * yl) / (yu - yl)
+        output.error_bound = abs(x_next - prev_xr)
+    except (ZeroDivisionError, OverflowError):
+        output.error_bound = 0
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, xr)
     output.errors = numpy.append(output.errors, err)
@@ -60,7 +65,7 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     symbol = get_symbol(expr)
     output = Output()
     _init_output(output, "Bisection", f, lambda x: x / 2)
-    output.error_bound = abs(log2(abs(xu - xl)) - log2(max_err))
+    output.error_bound = ceil(abs(log2(abs(xu - xl)) - log2(max_err)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
     begin = timeit.default_timer()
@@ -101,6 +106,8 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Newton-Raphson", f, f_diff)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xi)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
@@ -113,6 +120,13 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     end = timeit.default_timer()
+    try:
+        fxi = f(xi)
+        f_diff_xi = f_diff(xi)
+        x_next = xi - fxi / fxi_diff
+        output.error_bound = abs(x_next - xi)
+    except (ZeroDivisionError, OverflowError):
+        output.error_bound = 0
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
@@ -132,6 +146,8 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Newton-Raphson Mod#1", f, f_diff)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xi)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
@@ -144,6 +160,13 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     end = timeit.default_timer()
+    try:
+        fxi = f(xi)
+        f_diff_xi = f_diff(xi)
+        x_next = xi - m * fxi / fxi_diff
+        output.error_bound = abs(x_next - xi)
+    except (ZeroDivisionError, OverflowError):
+        output.error_bound = 0
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
@@ -164,6 +187,8 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Newton-Raphson Mod#2", f, f_diff)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xi)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
@@ -177,6 +202,14 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     end = timeit.default_timer()
+    try:
+        fxi = f(xi)
+        f_diff_xi = f_diff(xi)
+        f_diff_xi2 = f_diff2(xi)
+        x_next = xi - f_diff_xi * fxi / (f_diff_xi ** 2 - fxi * f_diff_xi2)
+        output.error_bound = abs(x_next - xi)
+    except (ZeroDivisionError, OverflowError):
+        output.error_bound = 0
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
@@ -194,6 +227,8 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Secant", f, expr_to_lambda(diff(expr)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xi)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         fxi = f(xi)
@@ -207,6 +242,13 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     end = timeit.default_timer()
+    try:
+        fxi = f(xi)
+        fxi_prev = f(xi_prev)
+        x_next = xi - fxi * (xi_prev - xi) / (fxi_prev - fxi)
+        output.error_bound = abs(x_next - xi)
+    except (ZeroDivisionError, OverflowError):
+        output.error_bound = 0
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
@@ -224,6 +266,8 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Fixed-Point", f, lambda x: x)
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xi)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for i in range(0, max_iter):
         root = xi - f(xi)
@@ -234,6 +278,11 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
         if err <= max_err:
             break
     end = timeit.default_timer()
+    try:
+        x_next = xi - f(xi)
+        output.error_bound = abs(x_next - xi)
+    except (ZeroDivisionError, OverflowError):
+        output.error_bound = 0
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
@@ -258,6 +307,8 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
     while m > 0:
         cur_xi = numpy.empty(0, dtype=numpy.float64)
         cur_err_i = numpy.empty(0, dtype=numpy.float64)
+        cur_xi = numpy.append(cur_xi, xi)
+        cur_err_i = numpy.append(cur_err_i, float('NaN'))
         b = numpy.zeros(m + 1, dtype=numpy.float64)
         c = numpy.zeros(m + 1, dtype=numpy.float64)
         err = 0
