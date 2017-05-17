@@ -8,7 +8,8 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
                              QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel, QFileDialog)
 from PyQt5.uic import loadUi
-
+import os.path
+from bisect import bisect_left
 
 class PandasModel(QtCore.QAbstractTableModel):
     """
@@ -51,10 +52,12 @@ class EquationSolverUi(QMainWindow):
         self.func_plot = self.error_plot = None
         self.figs = [[plt.figure(0), self.func_plot, self.func_tab], [plt.figure(1), self.error_plot, self.error_tab]]
         self.tabWidget_2.currentChanged.connect(self.tab_changed)
-        self.out = None
+        self.outs = []
+        self.indices = [0]
         self.func_canvas = self.error_canvas = None
         self.render_figs()
         self.actionLoad_File.triggered.connect(self.load_file)
+        self.actionSave_File.triggered.connect(self.save_file)
 
     def render_figs(self):
         canvases = []
@@ -103,16 +106,22 @@ class EquationSolverUi(QMainWindow):
             return
         try:
             if self.method_select.currentText() == "All methods":
+                counter = 0
                 for method in self.method_list:
-                    self.out = out = method(expr, guesses, eps, iter)
+                    out = method(expr, guesses, eps, iter)
+                    self.outs.append(out)
                     self.update_plots(out)
+                    self.indices.append(self.indices[counter] + len(out.dataframes))
+                    counter += 1
                     if len(out.dataframes > 1):
                         for i in range(0, len(out.dataframes)):
                             self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
                     else:
                         self.tabWidget_2.addTab(self._setup_tab(out), out.title)
             else:
-                self.out = out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
+                out = self.method_list[self.method_select.currentIndex()](expr, guesses, eps, iter)
+                self.indices.append(self.indices[0] + len(out.dataframes))
+                self.outs.append(out)
                 self.update_plots(out)
                 if len(out.dataframes) > 1:
                     for i in range(0, len(out.dataframes)):
@@ -168,22 +177,59 @@ class EquationSolverUi(QMainWindow):
 
     def load_file(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file')
+        data = None
+        inp = {}
         if fname[0]:
             with open(fname[0], 'r') as f:
                 data = f.read()
+                for line in data.strip().splitlines():
+                    parts = line.strip().replace('==', '=').split('=')
+                    if len(parts) < 2:
+                        continue
+                    parts[1] = '='.join(parts[1: ])
+                    inp[parts[0].strip()] = parts[1].strip()
+            if 'f' in inp:
+                self.equ_line.setText(inp['f'])
+            if 'max_err' in inp:
+                self.eps_line.setText(inp['max_err'])
+            if 'max_iter' in inp:
+                self.iter_line.setText(inp['max_iter'])
+            if 'arguments' in inp:
+                self.guess_line.setText(inp['arguments'])
+            if 'method_name' in inp:
+                index = self.method_select.findText(inp['method_name'], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    self.method_select.setCurrentIndex(index)
+
+
+    def save_file(self):
+        fname = QFileDialog.getExistingDirectory(self, 'Select Directory')
+        if fname[0]:
+            for out in self.outs:
+                for i in range(len(out.dataframes)):
+                    out.dataframes[i].to_csv(path_or_buf=os.path.join(fname,
+                    out.title + str(i + 1) + '.csv'))
 
     def tab_changed(self, index):
         self.error_plot.clear()
-        if self.out is None:
+        if self.outs is None:
             return
-        self.out.dataframes[index].plot(grid=True, title=self.out.title, ax=self.error_plot)  # , ax=self.error_plot
+        i = bisect_left(self.indices, index)
+        if i:
+            i -= 1
+        print(i, index)
+        self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
+         title=self.outs[i].title, ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
 
     def clear(self):
         self.error_msg.setText("")
-        self.out = None
+        self.outs = []
+        self.indices = [0]
         self.error_plot.clear()
         self.func_plot.clear()
+        self.error_canvas.draw()
+        self.func_canvas.draw()
         self.tabWidget_2.clear()
 
 
