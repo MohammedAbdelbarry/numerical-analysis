@@ -8,6 +8,7 @@ import timeit
 from equations_util import *
 from math import log2, ceil
 
+
 def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     if len(arguments) != 2:
         raise ValueError("Error! Invalid number of arguments")

@@ -11,6 +11,7 @@ from PyQt5.uic import loadUi
 import os.path
 from bisect import bisect_left
 
+
 class PandasModel(QtCore.QAbstractTableModel):
     """
     Class to populate a table view with a pandas dataframe
@@ -119,12 +120,12 @@ class EquationSolverUi(QMainWindow):
         if self.solving_all_flag:
             try:
                 self.solve_single(self.method_list[self.counter])
+                self.counter += 1
             except Exception as e:
-                self.failures += 1
                 self.show_error_msg(str(e))
             finally:
-                self.counter += 1
                 if self.counter == len(self.method_list):
+                    self.clear()
                     self.counter = self.failures = 0
                     self.solving_all_flag = False
                     self.method_select.setEnabled(True)
@@ -135,7 +136,6 @@ class EquationSolverUi(QMainWindow):
             self.method_select.setEnabled(False)
             self.equ_line.setEnabled(False)
             self.solve_btn.setText("Continue")
-            self.solve_eq()
         else:
             self.clear()
             try:
@@ -198,7 +198,7 @@ class EquationSolverUi(QMainWindow):
                     parts = line.strip().replace('==', '=').split('=')
                     if len(parts) < 2:
                         continue
-                    parts[1] = '='.join(parts[1: ])
+                    parts[1] = '='.join(parts[1:])
                     inp[parts[0].strip()] = parts[1].strip()
             if 'f' in inp:
                 self.equ_line.setText(inp['f'])
@@ -213,14 +213,13 @@ class EquationSolverUi(QMainWindow):
                 if index >= 0:
                     self.method_select.setCurrentIndex(index)
 
-
     def save_file(self):
         fname = QFileDialog.getExistingDirectory(self, 'Select Directory')
         if fname[0]:
             for out in self.outs:
                 for i in range(len(out.dataframes)):
                     out.dataframes[i].to_csv(path_or_buf=os.path.join(fname,
-                    out.title + str(i + 1) + '.csv'))
+                                                                      out.title + str(i + 1) + '.csv'))
 
     def tab_changed(self, index):
         self.error_plot.clear()
@@ -230,7 +229,8 @@ class EquationSolverUi(QMainWindow):
         if i:
             i -= 1
         self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
-         title=self.outs[i].title, ax=self.error_plot)  # , ax=self.error_plot
+                                                              title=self.outs[i].title,
+                                                              ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
         print(self.outs[i].error_bound)
 
