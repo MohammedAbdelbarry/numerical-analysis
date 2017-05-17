@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
                              QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel, QFileDialog)
 from PyQt5.uic import loadUi
 import os.path
-from bisect import bisect_left
+from bisect import bisect_right
 
 
 class PandasModel(QtCore.QAbstractTableModel):
@@ -106,7 +106,7 @@ class EquationSolverUi(QMainWindow):
     def solve_single(self, func):
         expr, iter, eps, args = self.extract_info()
         out = func(expr, args, eps, iter)
-        self.indices.append(self.indices[self.counter - self.failures] + len(out.dataframes))
+        self.indices.append(self.indices[self.counter] + len(out.dataframes))
         self.outs.append(out)
         self.update_plots(out)
         if len(out.dataframes) > 1:
@@ -121,20 +121,25 @@ class EquationSolverUi(QMainWindow):
             try:
                 self.solve_single(self.method_list[self.counter])
                 self.counter += 1
+
             except Exception as e:
                 self.show_error_msg(str(e))
             finally:
                 if self.counter == len(self.method_list):
                     self.clear()
-                    self.counter = self.failures = 0
+                    self.counter = 0
                     self.solving_all_flag = False
                     self.method_select.setEnabled(True)
                     self.equ_line.setEnabled(True)
                     self.solve_btn.setText("Solve")
+                else:
+                    self.method_select.setCurrentIndex(self.counter)
         elif self.method_select.currentText() == 'All methods':
+            self.clear()
             self.solving_all_flag = True
             self.method_select.setEnabled(False)
             self.equ_line.setEnabled(False)
+            self.method_select.setCurrentIndex(0)
             self.solve_btn.setText("Continue")
         else:
             self.clear()
@@ -225,14 +230,16 @@ class EquationSolverUi(QMainWindow):
         self.error_plot.clear()
         if not self.outs:
             return
-        i = bisect_left(self.indices, index)
+        i = bisect_right(self.indices, index)
         if i:
             i -= 1
+        print(i, index, self.indices[i])
         self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
                                                               title=self.outs[i].title,
                                                               ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
-        print(self.outs[i].error_bound)
+        print(self.indices)
+        print(len(self.outs))
 
     def clear(self):
         self.error_msg.setText("")
