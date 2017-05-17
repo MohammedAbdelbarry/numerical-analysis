@@ -232,6 +232,7 @@ class EquationSolverUi(QMainWindow):
         self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
          title=self.outs[i].title, ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
+        print(self.outs[i].error_bound)
 
     def clear(self):
         self.error_msg.setText("")
