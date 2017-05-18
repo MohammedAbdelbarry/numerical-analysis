@@ -114,6 +114,8 @@ def string_to_expression(expr_str: str):
 
 def diff(expr: sympy.Expr):
     symbol = get_symbol(expr)
+    if not symbol:
+        return sympy.diff(expr)
     return sympy.diff(expr, symbol)
 
 
