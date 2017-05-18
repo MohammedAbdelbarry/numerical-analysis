@@ -1,8 +1,9 @@
 import sys
 import os.path
+
 from EquSys import *
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QErrorMessage,
+from PyQt5.QtWidgets import (QApplication, QMainWindow,
                              QMessageBox, QWidget, QFormLayout, QTableView, QVBoxLayout, QLineEdit, QLabel, QFileDialog)
 from PyQt5.uic import loadUi
 
@@ -47,8 +48,9 @@ class LinearEquationsSolver(QMainWindow):
         self.method_list = [gauss, gauss_jordan, lu_decomp, gauss_seidel, jacobi]
         self.solve_btn.clicked.connect(self.solve_linear_eqs)
         self.outs = []
-        # self.actionLoad_File.triggered.connect(self.load_file)
+        self.actionLoad_File.triggered.connect(self.load_file)
         self.actionSave_File.triggered.connect(self.save_file)
+        self.actionExit.triggered.connect(self.exit)
 
     @staticmethod
     def extract_equations(equations):
@@ -97,31 +99,32 @@ class LinearEquationsSolver(QMainWindow):
     def show_error_msg(self, msg):
         self.error_msg.setText(msg)
 
-    # def load_file(self):
-    #     fname = QFileDialog.getOpenFileName(self, 'Open file')
-    #     data = None
-    #     inp = {}
-    #     if fname[0]:
-    #         with open(fname[0], 'r') as f:
-    #             data = f.read()
-    #             for line in data.strip().splitlines():
-    #                 parts = line.strip().replace('==', '=').split('=')
-    #                 if len(parts) < 2:
-    #                     continue
-    #                 parts[1] = '='.join(parts[1:])
-    #                 inp[parts[0].strip()] = parts[1].strip()
-    #         if 'f' in inp:
-    #             self.equ_line.setText(inp['f'])
-    #         if 'max_err' in inp:
-    #             self.eps_line.setText(inp['max_err'])
-    #         if 'max_iter' in inp:
-    #             self.iter_line.setText(inp['max_iter'])
-    #         if 'arguments' in inp:
-    #             self.guess_line.setText(inp['arguments'])
-    #         if 'method_name' in inp:
-    #             index = self.method_select.findText(inp['method_name'], QtCore.Qt.MatchFixedString)
-    #             if index >= 0:
-    #                 self.method_select.setCurrentIndex(index)
+    def load_file(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file')
+        data = None
+        inp = {}
+        if fname[0]:
+            with open(fname[0], 'r') as f:
+                data = f.read()
+                for line in data.strip().splitlines():
+                    parts = line.strip().replace('==', '=').split('=')
+                    if len(parts) < 2:
+                        continue
+                    parts[1] = '='.join(parts[1:])
+                    inp[parts[0].strip()] = parts[1].strip()
+            if 'equ' in inp:
+                equs = [x.strip() for x in inp['equ'].strip().split(',')]
+                self.equations_text.clear()
+                for eq in equs:
+                    self.equations_text.append(eq)
+            if 'max_err' in inp:
+                self.eps_line.setText(inp['max_err'])
+            if 'max_iter' in inp:
+                self.iter_line.setText(inp['max_iter'])
+            if 'method_name' in inp:
+                index = self.method_select.findText(inp['method_name'], QtCore.Qt.MatchFixedString)
+                if index >= 0:
+                    self.method_select.setCurrentIndex(index)
 
     def save_file(self):
         fname = QFileDialog.getExistingDirectory(self, 'Select Directory')
@@ -130,6 +133,9 @@ class LinearEquationsSolver(QMainWindow):
                 for i in range(len(out.dataframes)):
                     out.dataframes[i].to_csv(path_or_buf=os.path.join(fname,
                                                                       out.title + str(i + 1) + '.csv'))
+
+    def exit(self):
+        sys.exit(app.exec_())
 
     @staticmethod
     def _setup_tab(out: Output):
