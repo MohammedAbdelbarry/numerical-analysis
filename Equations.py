@@ -22,6 +22,8 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     _init_output(output, "Regula-Falsi", f, expr_to_lambda(diff(expr)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xl)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         yl = f(xl)
@@ -69,6 +71,8 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     output.error_bound = ceil(abs(log2(abs(xu - xl)) - log2(max_err)))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
+    cur_xi = numpy.append(cur_xi, xl)
+    cur_err_i = numpy.append(cur_err_i, float('NaN'))
     begin = timeit.default_timer()
     for _ in range(0, max_iter):
         yl = f(xl)
@@ -358,7 +362,8 @@ def illinois(expr, arguments, max_err=1e-5, max_iter=50):
 
         prev_xi = err = 0
         cur_xi = cur_err_i = numpy.empty(0, dtype=numpy.float64)
-
+        cur_xi = numpy.append(cur_xi, xl)
+        cur_err_i = numpy.append(cur_err_i, float('NaN'))
         for _ in range(0, max_iter):
             if f_xl == 0:
                 cur_xi = numpy.append(cur_xi, xl)
