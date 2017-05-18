@@ -84,6 +84,7 @@ def gauss(system: sympy.Matrix, symbol_list: list):
     """
     output = Output()
     output.title = "Gaussian-Elimination"
+    system = system.as_mutable()
     n = system.shape[0]
     begin = timeit.default_timer()
     # iterate over columns
@@ -192,6 +193,7 @@ def jacobi(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1e-5, x
     of x during each iteration.
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
+    A = A.as_mutable()
     n = len(symbols)
     output = Output()
     output.title = "Jacobi"
@@ -244,6 +246,7 @@ def gauss_seidel(A: sympy.Matrix, symbols: list, b=None, max_iter=100, max_err=1
     of x during each iteration.
     3) The numpy array err_hist containing the values of the error during each iteration.
     """
+    A = A.as_mutable()
     n = len(symbols)
     output = Output()
     output.title = "Gauss-Seidel"
