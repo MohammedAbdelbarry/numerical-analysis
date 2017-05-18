@@ -204,6 +204,7 @@
      <string>File</string>
     </property>
     <addaction name="actionLoad_File"/>
+    <addaction name="actionSave_File"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -217,6 +218,16 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSave_FIle">
+   <property name="text">
+    <string>Save File</string>
+   </property>
+  </action>
+  <action name="actionSave_File">
+   <property name="text">
+    <string>Save File</string>
    </property>
   </action>
  </widget>
