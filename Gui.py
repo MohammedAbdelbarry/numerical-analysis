@@ -43,6 +43,35 @@ class PandasModel(QtCore.QAbstractTableModel):
         return None
 
 
+class PlotWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super(PlotWindow, self).__init__(parent)
+        loadUi('all_plots.ui', self)
+        self.error_plot = self.root_plot = None
+        self.figs = [[plt.figure(2), self.root_plot, self.root_tab],
+         [plt.figure(3), self.error_plot, self.error_tab]]
+        self.func_canvas = self.root_canvas = None
+        self.render_figs()
+
+
+    def render_figs(self):
+        canvases = []
+        for i, (fig, plot, tab) in enumerate(self.figs):
+            self.figs[i][1] = fig.add_subplot(111)
+            self.figs[i][1].grid(True)
+            self.figs[i][1].autoscale_view(True, True, True)
+            canvas = FigureCanvas(fig)
+            layout = QVBoxLayout()
+            layout.addWidget(canvas)
+            toolbar = NavigationToolbar(canvas, tab, coordinates=True)
+            layout.addWidget(toolbar)
+            tab.setLayout(layout)
+            canvases.append(canvas)
+            canvas.draw()
+        self.root_plot = self.figs[0][1]
+        self.error_plot = self.figs[1][1]
+        self.root_canvas, self.error_canvas = canvases[0], canvases[1]
+
 class EquationSolverUi(QMainWindow):
     def __init__(self, *args):
         super(EquationSolverUi, self).__init__(*args)
@@ -53,7 +82,8 @@ class EquationSolverUi(QMainWindow):
                             newton_mod2, regula_falsi, secant, birge_vieta, illinois]
         self.solve_btn.clicked.connect(self.solve_eq)
         self.func_plot = self.error_plot = None
-        self.figs = [[plt.figure(0), self.func_plot, self.func_tab], [plt.figure(1), self.error_plot, self.error_tab]]
+        self.figs = [[plt.figure(0), self.func_plot, self.func_tab],
+         [plt.figure(1), self.error_plot, self.error_tab]]
         self.tabWidget_2.currentChanged.connect(self.tab_changed)
         self.outs = []
         self.indices = [0]
@@ -63,11 +93,13 @@ class EquationSolverUi(QMainWindow):
         self.actionSave_File.triggered.connect(self.save_file)
         self.solving_all_flag = False
 
+
     def render_figs(self):
         canvases = []
         for i, (fig, plot, tab) in enumerate(self.figs):
             self.figs[i][1] = fig.add_subplot(111)
             self.figs[i][1].grid(True)
+            self.figs[i][1].autoscale_view(True, True, True)
             canvas = FigureCanvas(fig)
             layout = QVBoxLayout()
             layout.addWidget(canvas)
@@ -160,6 +192,7 @@ class EquationSolverUi(QMainWindow):
         self.func_plot.plot(x, [out.boundary_function(z) for z in x], 'g', label="g")
         self.func_plot.legend(["Function", "Boundary Function"])
         self.func_plot.set_title(out.title)
+        self.func_plot.relim()
         self.func_canvas.draw()
 
     @staticmethod
@@ -238,21 +271,24 @@ class EquationSolverUi(QMainWindow):
         print(i, index, self.indices[i])
         self.outs[i].dataframes[index - self.indices[i]].plot(grid=True,
                                                               title=self.outs[i].title,
-                                                              ax=self.error_plot)  # , ax=self.error_plot
+                                                              ax=self.error_plot)
+        self.error_plot.relim()
         self.error_canvas.draw()
         self.update_plots(self.outs[i])
         print(self.indices)
         print(len(self.outs))
 
     def plot_all_methods(self):
-        fig3 = plt.figure(2)
-        ax1 = fig3.add_subplot(111)
-        ax2 = fig3.add_subplot(211)
+        plot_window = PlotWindow(self)
         for out in self.outs:
-            out.dataframes[0].plot(y=out.dataframes[0].columns.values[0], label=out.title, ax=ax1)
+            out.dataframes[0].plot(y=out.dataframes[0].columns.values[0],
+             title="Roots",label=out.title, ax=plot_window.root_plot, grid=True)
         for out in self.outs:
-            out.dataframes[0].plot(y=out.dataframes[0].columns.values[2], label=out.title, ax=ax2)
-        fig3.show()
+            out.dataframes[0].plot(y=out.dataframes[0].columns.values[2],
+            title="Errors", label=out.title, ax=plot_window.error_plot, grid=True)
+        plot_window.error_canvas.draw()
+        plot_window.root_canvas.draw()
+        plot_window.show()
         #plt.show(block=False)
 
     def clear(self):
