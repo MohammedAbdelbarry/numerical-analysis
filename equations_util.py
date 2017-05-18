@@ -65,7 +65,7 @@ def create_dataframe(x: list, f,
         sym_str += str(i)
         err_str += str(i)
     df = pandas.DataFrame({sym_str: x,
-                           "f(" + sym_str + ")": list(map(f, x)),
+                           "f(" + sym_str + ")": [f(xi) for xi in x],
                            err_str: err})
     df = df[[sym_str, "f(" + sym_str + ")", err_str]]
     ### WE COULD ADD AN OPTION TO CHOOSE THE FILE NAME AND EXTENSION
@@ -74,7 +74,7 @@ def create_dataframe(x: list, f,
     # df.to_csv(path_or_buf=method_name + '.csv')
     # with open(method_name + '.html', 'w') as html_file:
     #    html_file.write(df.to_html())
-    return df
+    return df.astype(float)
 
 
 def create_equ_sys_df(symbol_list, value_list):
@@ -114,6 +114,8 @@ def string_to_expression(expr_str: str):
 
 def diff(expr: sympy.Expr):
     symbol = get_symbol(expr)
+    if not symbol:
+        return sympy.diff(expr)
     return sympy.diff(expr, symbol)
 
 

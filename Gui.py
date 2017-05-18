@@ -241,6 +241,16 @@ class EquationSolverUi(QMainWindow):
         print(self.indices)
         print(len(self.outs))
 
+    def plot_all_methods(self):
+        fig3 = plt.figure(2)
+        for out in self.outs:
+            out[0].plot()
+        fig4 = plt.figure(3)
+        for out in self.outs:
+            out[2].plot()
+        fig3.show(block=False)
+        fig4.show(block=False)
+
     def clear(self):
         self.error_msg.setText("")
         self.outs = []
