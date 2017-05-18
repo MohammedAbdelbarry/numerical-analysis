@@ -15,6 +15,7 @@ m = sympy.Matrix([[8, 4, -1, 11], [-2, 3, 1, 4], [2, -1, 6, 7]])
 
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
 aug, sym = equations_to_aug_matrix(["4 * x1 + 6 * x2 + 7 * x3 = -3", "2 * x2 + 3 * x3 = 8", "2 * x1 + x2 + 6 *x3 = 5"])
+aug, sym = equations_to_aug_matrix(["x1 + x2 + 2 * x3 = 8", "-x1 - 2 * x2 + 3 * x3 = 1", "3*x1+7*x2+4*x3 = 10"])
 # sympy.pprint(sympy.N(gauss_jordan(m), 4))
 # print(sympy.solve_linear_system(m, x, y, z))
 # print(sympy.Matrix(reversed(m.col(m.shape[0]))))
