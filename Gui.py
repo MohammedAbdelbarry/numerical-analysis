@@ -61,6 +61,7 @@ class EquationSolverUi(QMainWindow):
         self.render_figs()
         self.actionLoad_File.triggered.connect(self.load_file)
         self.actionSave_File.triggered.connect(self.save_file)
+        self.actionExit.triggered.connect(self.exit)
         self.solving_all_flag = False
 
     def render_figs(self):
@@ -106,7 +107,7 @@ class EquationSolverUi(QMainWindow):
     def solve_single(self, func):
         expr, iter, eps, args = self.extract_info()
         out = func(expr, args, eps, iter)
-        if(len(out.dataframes) == 0):
+        if (len(out.dataframes) == 0):
             raise ValueError("Could not find any roots")
         self.indices.append(self.indices[self.counter] + len(out.dataframes))
         self.outs.append(out)
@@ -126,7 +127,7 @@ class EquationSolverUi(QMainWindow):
                 self.show_error_msg(str(e))
             finally:
                 if self.counter == len(self.method_list):
-                    #self.clear()
+                    # self.clear()
                     self.plot_all_methods()
                     self.counter = 0
                     self.solving_all_flag = False
@@ -228,6 +229,9 @@ class EquationSolverUi(QMainWindow):
                     out.dataframes[i].to_csv(path_or_buf=os.path.join(fname,
                                                                       out.title + str(i + 1) + '.csv'))
 
+    def exit(self):
+        sys.exit(app.exec_())
+
     def tab_changed(self, index):
         self.error_plot.clear()
         if not self.outs:
@@ -253,7 +257,7 @@ class EquationSolverUi(QMainWindow):
         for out in self.outs:
             out.dataframes[0].plot(y=out.dataframes[0].columns.values[2], label=out.title, ax=ax2)
         fig3.show()
-        #plt.show(block=False)
+        # plt.show(block=False)
 
     def clear(self):
         self.error_msg.setText("")
