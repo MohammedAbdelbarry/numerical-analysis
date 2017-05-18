@@ -334,10 +334,13 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
 
 
 def illinois(expr, arguments, max_err=1e-5, max_iter=50):
-    if len(arguments) != 2:
+    delta = 0.1
+    if len(arguments) == 3:
+        delta = arguments[2]
+    elif len(arguments) != 2:
         raise ValueError("Error! Invalid number of arguments")
     start, end = arguments[0], arguments[1]
-    i, delta = 0, 0.1
+    i = 0
     f = expr_to_lambda(expr)
 
     symbol = get_symbol(expr)

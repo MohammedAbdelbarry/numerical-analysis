@@ -11,7 +11,10 @@ methods = {'Newton-Raphson': newton, 'Secant': secant, 'Bisection': bisection,
 # m = sympy.Matrix([[25, 5, 1, 106.8], [64, 8, 1, 177.2], [144, 12, 1, 279.2]])
 # m = sympy.Matrix([[1, 2, 2, 106.8], [2, 4, 1, 177.2], [4, 2, 1, 279.2]])
 m = sympy.Matrix([[8, 4, -1, 11], [-2, 3, 1, 4], [2, -1, 6, 7]])
+
+
 aug, sym = equations_to_aug_matrix(["12*x + 3*y - 5*z - 1 == 0", "x+5*y+3*z=28", "3*x+7*y+13*z=76"])
+aug, sym = equations_to_aug_matrix(["4 * x1 + 6 * x2 + 7 * x3 = -3", "2 * x2 + 3 * x3 = 8", "2 * x1 + x2 + 6 *x3 = 5"])
 # sympy.pprint(sympy.N(gauss_jordan(m), 4))
 # print(sympy.solve_linear_system(m, x, y, z))
 # print(sympy.Matrix(reversed(m.col(m.shape[0]))))
@@ -34,7 +37,7 @@ print(out.dataframes)
 print(out.execution_time)
 print(out.roots)
 print(out.errors)
-
+sympy.pprint(aug)
 out = gauss_seidel(aug, sym)
 print(out.title)
 print(out.dataframes)

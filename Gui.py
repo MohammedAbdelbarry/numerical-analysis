@@ -106,9 +106,10 @@ class EquationSolverUi(QMainWindow):
     def solve_single(self, func):
         expr, iter, eps, args = self.extract_info()
         out = func(expr, args, eps, iter)
+        if(len(out.dataframes) == 0):
+            raise ValueError("Could not find any roots")
         self.indices.append(self.indices[self.counter] + len(out.dataframes))
         self.outs.append(out)
-        self.update_plots(out)
         if len(out.dataframes) > 1:
             for i in range(0, len(out.dataframes)):
                 self.tabWidget_2.addTab(self._setup_tab(out, i), out.title + " " + str(i + 1))
@@ -121,12 +122,12 @@ class EquationSolverUi(QMainWindow):
             try:
                 self.solve_single(self.method_list[self.counter])
                 self.counter += 1
-
             except Exception as e:
                 self.show_error_msg(str(e))
             finally:
                 if self.counter == len(self.method_list):
-                    self.clear()
+                    #self.clear()
+                    self.plot_all_methods()
                     self.counter = 0
                     self.solving_all_flag = False
                     self.method_select.setEnabled(True)
@@ -158,6 +159,7 @@ class EquationSolverUi(QMainWindow):
         self.func_plot.plot(x, [out.function(z) for z in x], 'r', label="f")
         self.func_plot.plot(x, [out.boundary_function(z) for z in x], 'g', label="g")
         self.func_plot.legend(["Function", "Boundary Function"])
+        self.func_plot.set_title(out.title)
         self.func_canvas.draw()
 
     @staticmethod
@@ -238,18 +240,20 @@ class EquationSolverUi(QMainWindow):
                                                               title=self.outs[i].title,
                                                               ax=self.error_plot)  # , ax=self.error_plot
         self.error_canvas.draw()
+        self.update_plots(self.outs[i])
         print(self.indices)
         print(len(self.outs))
 
     def plot_all_methods(self):
         fig3 = plt.figure(2)
+        ax1 = fig3.add_subplot(111)
+        ax2 = fig3.add_subplot(211)
         for out in self.outs:
-            out[0].plot()
-        fig4 = plt.figure(3)
+            out.dataframes[0].plot(y=out.dataframes[0].columns.values[0], label=out.title, ax=ax1)
         for out in self.outs:
-            out[2].plot()
-        fig3.show(block=False)
-        fig4.show(block=False)
+            out.dataframes[0].plot(y=out.dataframes[0].columns.values[2], label=out.title, ax=ax2)
+        fig3.show()
+        #plt.show(block=False)
 
     def clear(self):
         self.error_msg.setText("")
