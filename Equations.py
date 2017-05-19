@@ -15,7 +15,8 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     f = expr_to_lambda(expr)
     if f(xl) * f(xu) > 0:
-        raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
+        raise ValueError(
+            "Error! There are no roots in the range [%d, %d]" % (xl, xu))
     prev_xr = 0
     symbol = get_symbol(expr)
     output = Output()
@@ -53,7 +54,8 @@ def regula_falsi(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, xr)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -63,7 +65,8 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     xl, xu = min(arguments[0], arguments[1]), max(arguments[0], arguments[1])
     f = expr_to_lambda(expr)
     if f(xl) * f(xu) > 0:
-        raise ValueError("Error! There are no roots in the range [%d, %d]" % (xl, xu))
+        raise ValueError(
+            "Error! There are no roots in the range [%d, %d]" % (xl, xu))
     prev_xr = 0
     symbol = get_symbol(expr)
     output = Output()
@@ -95,7 +98,8 @@ def bisection(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, xr)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -135,7 +139,8 @@ def newton(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -175,7 +180,8 @@ def newton_mod1(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -218,7 +224,8 @@ def newton_mod2(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -257,7 +264,8 @@ def secant(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -268,7 +276,7 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     f = expr_to_lambda(expr)
     symbol = get_symbol(expr)
     output = Output()
-    _init_output(output, "Fixed-Point", f, lambda x: x)
+    _init_output(output, "Fixed-Point", f, lambda x: x - f(x))
     cur_xi = numpy.empty(0, dtype=numpy.float64)
     cur_err_i = numpy.empty(0, dtype=numpy.float64)
     cur_xi = numpy.append(cur_xi, xi)
@@ -291,7 +299,8 @@ def fixed_point(expr, arguments, max_err=1e-5, max_iter=50):
     output.execution_time = abs(end - begin)
     output.roots = numpy.append(output.roots, root)
     output.errors = numpy.append(output.errors, err)
-    output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol))
+    output.dataframes.append(create_dataframe(
+        cur_xi, output.function, cur_err_i, symbol))
     return output
 
 
@@ -328,7 +337,8 @@ def birge_vieta(expr, arguments, max_err=1e-5, max_iter=50):
                 break
         a = b[0: -1]
         m = len(a) - 1
-        output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol, i))
+        output.dataframes.append(create_dataframe(
+            cur_xi, output.function, cur_err_i, symbol, i))
         i += 1
         output.roots = numpy.append(output.roots, xi)
         output.errors = numpy.append(output.errors, err)
@@ -389,7 +399,8 @@ def illinois(expr, arguments, max_err=1e-5, max_iter=50):
             if err <= max_err:
                 break
 
-        output.dataframes.append(create_dataframe(cur_xi, output.function, cur_err_i, symbol, counter))
+        output.dataframes.append(create_dataframe(
+            cur_xi, output.function, cur_err_i, symbol, counter))
         i += 1
         output.roots = numpy.append(output.roots, prev_xi)
         output.errors = numpy.append(output.errors, err)
@@ -424,7 +435,8 @@ if __name__ == '__main__':
     # 4) Regula-Falsi Method
     # 5) Modified Newton(With Known Multiplicity)
     # 6) Modified Newton(With Unknown Multiplicity)""")
-    out = birge_vieta(sympy.sympify("x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
+    out = birge_vieta(sympy.sympify(
+        "x**4 - 9*x**3 - 2*x**2 + 120 * x -130"), [-3])
     print(out.title + ":", out.execution_time)
     for df in out.dataframes:
         print(df)
